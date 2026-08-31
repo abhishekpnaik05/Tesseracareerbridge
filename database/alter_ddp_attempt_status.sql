@@ -1,0 +1,1 @@
+ALTER TABLE "DdpAttempt" ALTER COLUMN "status" TYPE TEXT;

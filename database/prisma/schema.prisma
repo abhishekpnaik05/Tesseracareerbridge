@@ -1,0 +1,888 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  MENTOR
+  ADMIN
+  CONTENT_MANAGER
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum EnrollmentStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  WITHDRAWN
+  SUSPENDED
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  EVALUATED
+  RETURNED
+  RESUBMISSION_REQUIRED
+}
+
+enum AssignmentType {
+  TEXT
+  FILE_UPLOAD
+  LINK
+}
+
+enum AssignmentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AssignmentResourceType {
+  LINK
+  PDF
+  GITHUB
+  DOC
+  OTHER
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum StorageObjectKind {
+  VIDEO
+  PDF
+  IMAGE
+  ASSIGNMENT_FILE
+  PROJECT_REPORT
+  PRESENTATION
+  SUBMISSION
+  CERTIFICATE
+  OTHER
+}
+
+model User {
+  id              String     @id @default(cuid())
+  email           String     @unique
+  passwordHash    String
+  role            UserRole
+  status          UserStatus @default(PENDING_VERIFICATION)
+  displayName     String
+  phone           String?
+  emailVerifiedAt DateTime?
+  lastLoginAt     DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  studentProfile StudentProfile?
+  mentorProfile  MentorProfile?
+  sessions       AuthSession[]
+  challenges     AuthChallenge[]
+  enrollments    Enrollment[]
+  notifications  Notification[]
+  announcements  Announcement[]  @relation("AnnouncementAuthor")
+  payments       Payment[]
+  doubts         Doubt[]
+  doubtReplies   DoubtReply[]
+}
+
+model AuthSession {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+}
+
+enum AuthChallengeType {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+}
+
+model AuthChallenge {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      AuthChallengeType
+  tokenHash String            @unique
+  otpHash   String?
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime          @default(now())
+
+  @@index([userId, type])
+}
+
+model StudentProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  university      String?
+  usn             String?
+  branch          String?
+  semester        Int?
+  phone           String?
+  photoKey        String?
+  college         String?
+  graduationYear  Int?
+  city            String?
+  state           String?
+  preferences     Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  attendance     Attendance[]
+  certificates   Certificate[]
+  testAttempts   TestAttempt[]
+  projectSubs    ProjectSubmission[]
+}
+
+model MentorProfile {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title      String?
+  bio        String?
+  phone      String?
+  photoKey   String?
+  skills     String?
+  experience String?
+  linkedin   String?
+  github     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  batches               BatchMentor[]
+  evaluations           Evaluation[]
+  reviewedSubmissions   AssignmentSubmission[]
+}
+
+enum ProgramStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum BatchStatus {
+  DRAFT
+  UPCOMING
+  OPEN
+  FULL
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum CurriculumStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Program {
+  id                   String        @id @default(cuid())
+  slug                 String        @unique
+  title                String
+  summary              String?
+  description          String?
+  thumbnailKey         String?
+  durationWeeks        Int?
+  durationLabel        String?
+  level                String?
+  category             String?
+  featured             Boolean       @default(false)
+  status               ProgramStatus @default(DRAFT)
+  availability         String        @default("OPEN")
+  audience             String?
+  learningApproach     String?
+  learningDaysPerWeek  Int?
+  visualTone           String        @default("a")
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  skills       ProgramSkill[]
+  outcomes     ProgramOutcome[]
+  requirements ProgramRequirement[]
+  benefits     ProgramBenefit[]
+  faqs         ProgramFaq[]
+  projectPreviews ProgramProjectPreview[]
+  batches      Batch[]
+  weeks        Week[]
+  enrollments  Enrollment[]
+  ddps         Ddp[]
+  assignments  Assignment[]
+  tests        Test[]
+  projects     Project[]
+  certificates Certificate[]
+
+  @@index([status, featured])
+  @@index([category, level])
+}
+
+model ProgramSkill {
+  id        String  @id @default(cuid())
+  programId String
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  name      String
+  sortOrder Int     @default(0)
+
+  @@index([programId, sortOrder])
+}
+
+model ProgramOutcome {
+  id        String  @id @default(cuid())
+  programId String
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  body      String
+  sortOrder Int     @default(0)
+}
+
+model ProgramRequirement {
+  id        String  @id @default(cuid())
+  programId String
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  body      String
+  sortOrder Int     @default(0)
+}
+
+model ProgramBenefit {
+  id        String  @id @default(cuid())
+  programId String
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  title     String
+  body      String?
+  sortOrder Int     @default(0)
+}
+
+model ProgramFaq {
+  id        String  @id @default(cuid())
+  programId String
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  sortOrder Int     @default(0)
+}
+
+model ProgramProjectPreview {
+  id          String   @id @default(cuid())
+  programId   String
+  program     Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  title       String
+  type        String
+  description String?
+  difficulty  String?
+  skills      String[]
+  sortOrder   Int      @default(0)
+}
+
+model Batch {
+  id                   String      @id @default(cuid())
+  programId            String
+  program              Program     @relation(fields: [programId], references: [id], onDelete: Cascade)
+  name                 String
+  slug                 String?
+  startsAt             DateTime?
+  endsAt               DateTime?
+  enrollmentOpenDate   DateTime?
+  enrollmentCloseDate  DateTime?
+  capacity             Int?
+  status               BatchStatus @default(DRAFT)
+  description          String?
+  isActive             Boolean     @default(true)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  mentors      BatchMentor[]
+  enrollments  Enrollment[]
+  announcements Announcement[]
+  attendance   Attendance[]
+
+  @@index([programId, status])
+  @@index([status, enrollmentOpenDate, enrollmentCloseDate])
+  @@unique([slug])
+}
+
+model BatchMentor {
+  batchId  String
+  mentorId String
+  batch    Batch         @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  mentor   MentorProfile @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+
+  @@id([batchId, mentorId])
+}
+
+model Enrollment {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  programId   String
+  program     Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  batchId     String
+  batch       Batch            @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  status      EnrollmentStatus @default(PENDING)
+  enrolledAt  DateTime         @default(now())
+  activatedAt DateTime?
+  completedAt DateTime?
+  cancelledAt DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  progress            Progress[]
+  activityProgress    StudentActivityProgress[]
+  ddpAttempts         DdpAttempt[]
+  assignmentSubs      AssignmentSubmission[]
+
+  @@unique([userId, batchId])
+  @@index([userId, status])
+  @@index([batchId, status])
+}
+
+model Week {
+  id          String           @id @default(cuid())
+  programId   String
+  program     Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  index       Int
+  title       String
+  objective   String?
+  description String?
+  status      CurriculumStatus @default(DRAFT)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  days Day[]
+
+  @@unique([programId, index])
+}
+
+model Day {
+  id                String           @id @default(cuid())
+  weekId            String
+  week              Week             @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  index             Int
+  title             String
+  objective         String?
+  description       String?
+  estimatedDuration Int?
+  status            CurriculumStatus @default(DRAFT)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  lessons        Lesson[]
+  videos         Video[]
+  notes          Note[]
+  resources      Resource[]
+  practiceTasks  PracticeTask[]
+  ddps           Ddp[]
+  assignments    Assignment[]
+  tests          Test[]
+  progress       Progress[]
+
+  @@unique([weekId, index])
+}
+
+model Lesson {
+  id        String   @id @default(cuid())
+  dayId     String
+  day       Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  title     String
+  body      String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Video {
+  id              String   @id @default(cuid())
+  dayId           String
+  day             Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  title           String
+  storageObjectId String?
+  storageObject   StorageObject? @relation(fields: [storageObjectId], references: [id])
+  durationSeconds Int?
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  dayId     String
+  day       Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  title     String
+  body      String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Resource {
+  id              String   @id @default(cuid())
+  dayId           String
+  day             Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  title           String
+  storageObjectId String?
+  storageObject   StorageObject? @relation(fields: [storageObjectId], references: [id])
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PracticeTask {
+  id          String   @id @default(cuid())
+  dayId       String
+  day         Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  title       String
+  instructions String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Progress {
+  id           String         @id @default(cuid())
+  enrollmentId String
+  enrollment   Enrollment     @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  dayId        String
+  day          Day            @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  status       ProgressStatus @default(NOT_STARTED)
+  completedAt  DateTime?
+  updatedAt    DateTime       @updatedAt
+
+  activityProgress StudentActivityProgress[]
+
+  @@unique([enrollmentId, dayId])
+}
+
+model StudentActivityProgress {
+  id              String         @id @default(cuid())
+  enrollmentId    String
+  enrollment      Enrollment     @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  progressId      String
+  progress        Progress       @relation(fields: [progressId], references: [id], onDelete: Cascade)
+  contentType     String
+  contentId       String
+  status          ProgressStatus @default(NOT_STARTED)
+  progressPercent Int            @default(0)
+  metadata        Json?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  lastAccessedAt  DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@unique([enrollmentId, contentType, contentId])
+  @@index([enrollmentId, contentId])
+  @@index([contentType, contentId])
+}
+
+model Ddp {
+  id              String   @id @default(cuid())
+  programId       String
+  program         Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  dayId           String?
+  day             Day?     @relation(fields: [dayId], references: [id], onDelete: SetNull)
+  title           String
+  description     String?
+  instructions    String?
+  durationMinutes Int      @default(15)
+  passingScore    Int      @default(70)
+  maxAttempts     Int      @default(3)
+  randomizeQuestions Boolean @default(false)
+  randomizeOptions   Boolean @default(false)
+  required        Boolean  @default(true)
+  status          String   @default("DRAFT")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  questions DdpQuestion[]
+  attempts  DdpAttempt[]
+}
+
+model DdpQuestion {
+  id          String   @id @default(cuid())
+  ddpId       String
+  ddp         Ddp      @relation(fields: [ddpId], references: [id], onDelete: Cascade)
+  prompt      String
+  explanation String?
+  type        String   @default("MCQ_SINGLE")
+  points      Int      @default(1)
+  sortOrder   Int      @default(0)
+  difficulty  String?
+  status      String   @default("PUBLISHED")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  options DdpQuestionOption[]
+  answers DdpAnswer[]
+}
+
+model DdpQuestionOption {
+  id         String  @id @default(cuid())
+  questionId String
+  question   DdpQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  text       String
+  isCorrect  Boolean @default(false)
+  sortOrder  Int     @default(0)
+
+  @@index([questionId, sortOrder])
+}
+
+model DdpAttempt {
+  id               String           @id @default(cuid())
+  ddpId            String
+  ddp              Ddp              @relation(fields: [ddpId], references: [id], onDelete: Cascade)
+  enrollmentId     String
+  enrollment       Enrollment       @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  attemptNumber    Int              @default(1)
+  status           String           @default("IN_PROGRESS")
+  startedAt        DateTime         @default(now())
+  submittedAt      DateTime?
+  score            Int?
+  percentage       Decimal?         @db.Decimal(5, 2)
+  passed           Boolean?
+  timeSpent        Int?
+  flagData         Json?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  answers DdpAnswer[]
+
+  @@unique([ddpId, enrollmentId, attemptNumber])
+  @@index([ddpId, enrollmentId])
+  @@index([status])
+}
+
+model DdpAnswer {
+  id               String  @id @default(cuid())
+  attemptId        String
+  attempt          DdpAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId       String
+  question         DdpQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOptionIds String[]
+  isCorrect         Boolean?
+  pointsAwarded     Int?
+  answeredAt        DateTime @default(now())
+  createdAt         DateTime @default(now())
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@index([questionId])
+}
+
+model Assignment {
+  id               String           @id @default(cuid())
+  programId        String
+  program          Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  dayId            String?
+  day              Day?             @relation(fields: [dayId], references: [id], onDelete: SetNull)
+  title            String
+  brief            String?
+  description      String?
+  instructions     String?
+  type             AssignmentType   @default(TEXT)
+  assignmentStatus AssignmentStatus @default(DRAFT)
+  maxScore         Int              @default(100)
+  passingScore     Int?
+  estimatedTime    Int?             // minutes
+  isRequired       Boolean          @default(true)
+  maxAttempts      Int              @default(1)
+  dueAt            DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  submissions  AssignmentSubmission[]
+  requirements AssignmentRequirement[]
+  resources    AssignmentResource[]
+
+  @@index([dayId, assignmentStatus])
+}
+
+model AssignmentRequirement {
+  id           String     @id @default(cuid())
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  body         String
+  sortOrder    Int        @default(0)
+
+  @@index([assignmentId, sortOrder])
+}
+
+model AssignmentResource {
+  id           String                 @id @default(cuid())
+  assignmentId String
+  assignment   Assignment             @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  title        String
+  url          String?
+  type         AssignmentResourceType @default(LINK)
+  sortOrder    Int                    @default(0)
+
+  @@index([assignmentId, sortOrder])
+}
+
+model AssignmentSubmission {
+  id                  String           @id @default(cuid())
+  assignmentId        String
+  assignment          Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  enrollmentId        String
+  enrollment          Enrollment       @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  attemptNumber       Int              @default(1)
+  status              SubmissionStatus @default(DRAFT)
+  textAnswer          String?
+  linkUrl             String?
+  fileKey             String?
+  fileOriginalName    String?
+  score               Int?
+  feedback            String?
+  reviewedAt          DateTime?
+  reviewedByMentorId  String?
+  reviewedByMentor    MentorProfile?   @relation(fields: [reviewedByMentorId], references: [id], onDelete: SetNull)
+  isLate              Boolean          @default(false)
+  submittedAt         DateTime?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  @@unique([assignmentId, enrollmentId, attemptNumber])
+  @@index([assignmentId, enrollmentId])
+  @@index([enrollmentId, status])
+}
+
+model Evaluation {
+  id                     String                 @id @default(cuid())
+  projectSubmissionId    String?                @unique
+  projectSubmission      ProjectSubmission?     @relation(fields: [projectSubmissionId], references: [id], onDelete: Cascade)
+  mentorId               String?
+  mentor                 MentorProfile?         @relation(fields: [mentorId], references: [id], onDelete: SetNull)
+  score                  Decimal?               @db.Decimal(5, 2)
+  feedback               String?
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+}
+
+model Test {
+  id        String   @id @default(cuid())
+  programId String
+  program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  dayId     String?
+  day       Day?     @relation(fields: [dayId], references: [id], onDelete: SetNull)
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  questions TestQuestion[]
+  attempts  TestAttempt[]
+}
+
+model TestQuestion {
+  id        String   @id @default(cuid())
+  testId    String
+  test      Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  prompt    String
+  sortOrder Int      @default(0)
+}
+
+model TestAttempt {
+  id               String           @id @default(cuid())
+  testId           String
+  test             Test             @relation(fields: [testId], references: [id], onDelete: Cascade)
+  studentProfileId String
+  student          StudentProfile   @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  status           SubmissionStatus @default(DRAFT)
+  score            Decimal?         @db.Decimal(5, 2)
+  submittedAt      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  programId   String
+  program     Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  title       String
+  brief       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  milestones  ProjectMilestone[]
+  submissions ProjectSubmission[]
+}
+
+model ProjectMilestone {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title     String
+  dueAt     DateTime?
+  sortOrder Int      @default(0)
+}
+
+model ProjectSubmission {
+  id               String           @id @default(cuid())
+  projectId        String
+  project          Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  studentProfileId String
+  student          StudentProfile   @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  status           SubmissionStatus @default(DRAFT)
+  storageObjectId  String?
+  storageObject    StorageObject?   @relation(fields: [storageObjectId], references: [id])
+  submittedAt      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  evaluation Evaluation?
+
+  @@unique([projectId, studentProfileId])
+}
+
+model Doubt {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  replies DoubtReply[]
+}
+
+model DoubtReply {
+  id        String   @id @default(cuid())
+  doubtId   String
+  doubt     Doubt    @relation(fields: [doubtId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  batchId   String?
+  batch     Batch?   @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation("AnnouncementAuthor", fields: [authorId], references: [id])
+  title     String
+  body      String
+  priority  String   @default("NORMAL")
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  category  String    @default("ACCOUNT")
+  priority  String    @default("NORMAL")
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+}
+
+model Attendance {
+  id               String           @id @default(cuid())
+  batchId          String
+  batch            Batch            @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  studentProfileId String
+  student          StudentProfile   @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  occurredOn       DateTime         @db.Date
+  status           AttendanceStatus
+  createdAt        DateTime         @default(now())
+
+  @@unique([batchId, studentProfileId, occurredOn])
+}
+
+model Certificate {
+  id               String   @id @default(cuid())
+  programId        String
+  program          Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  studentProfileId String
+  student          StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  issuedAt         DateTime?
+  storageObjectId  String?
+  storageObject    StorageObject? @relation(fields: [storageObjectId], references: [id])
+  createdAt        DateTime @default(now())
+
+  verification CertificateVerification?
+}
+
+model CertificateVerification {
+  id            String      @id @default(cuid())
+  certificateId String      @unique
+  certificate   Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  publicCode    String      @unique
+  verifiedAt    DateTime?
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Decimal       @db.Decimal(10, 2)
+  currency  String        @default("INR")
+  status    PaymentStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  paymentId String
+  payment   Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  provider  String
+  reference String?
+  rawStatus String?
+  createdAt DateTime @default(now())
+}
+
+model StorageObject {
+  id           String            @id @default(cuid())
+  kind         StorageObjectKind
+  key          String            @unique
+  mimeType     String
+  byteSize     Int
+  originalName String
+  createdAt    DateTime          @default(now())
+
+  videos               Video[]
+  resources            Resource[]
+  projectSubmissions   ProjectSubmission[]
+  certificates         Certificate[]
+}

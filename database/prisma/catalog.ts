@@ -1,0 +1,404 @@
+export interface CatalogProgram {
+  slug: string;
+  title: string;
+  summary: string;
+  description: string;
+  durationWeeks: number;
+  durationLabel: string;
+  level: string;
+  category: string;
+  featured: boolean;
+  availability: string;
+  audience: string;
+  learningApproach: string;
+  learningDaysPerWeek: number;
+  visualTone: "a" | "b" | "c" | "d";
+  skills: string[];
+  requirements: string[];
+  outcomes: string[];
+  benefits: { title: string; body: string }[];
+  faqs: { title: string; body: string }[];
+  weeks: { title: string; days: string[] }[];
+  projects: { title: string; type: string; description: string; difficulty: string; skills: string[] }[];
+  batches: {
+    name: string;
+    slug: string;
+    startsAt: Date;
+    endsAt: Date;
+    enrollmentOpenDate: Date;
+    enrollmentCloseDate: Date;
+    capacity: number;
+    status: "DRAFT" | "UPCOMING" | "OPEN" | "FULL" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+    description?: string;
+  }[];
+}
+
+const standardBenefits = [
+  { title: "Structured curriculum", body: "Weeks and days defined as program data, not a pile of links." },
+  { title: "Daily learning", body: "A weekday rhythm of objective, lesson, and practice." },
+  { title: "Practice", body: "Exercises that follow the day's topic." },
+  { title: "DDP", body: "Daily development practice after you enroll." },
+  { title: "Assignments", body: "Reviewed work that belongs in your record." },
+  { title: "Projects", body: "Mini builds that lead to a major project." },
+  { title: "Mentor support", body: "Doubts, assignment feedback, and project guidance." },
+  { title: "Assessments", body: "Checks against the curriculum, not a vanity quiz." },
+  { title: "Certificate", body: "Issued after evaluation — not on signup." },
+];
+
+const today = new Date();
+const oneMonthFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+const threeMonthsFromNow = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+function createBatches(baseName: string, weeks: number) {
+  const startDate = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000); // 2 weeks from now
+  const endDate = new Date(startDate.getTime() + weeks * 7 * 24 * 60 * 60 * 1000);
+  const enrollmentOpen = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000); // Open now
+  const enrollmentClose = new Date(startDate.getTime() - 2 * 24 * 60 * 60 * 1000); // Close 2 days before start
+
+  return [
+    {
+      name: `${baseName} - September 2026`,
+      slug: `${baseName.toLowerCase().replace(/\s+/g, '-')}-september-2026`,
+      startsAt: startDate,
+      endsAt: endDate,
+      enrollmentOpenDate: enrollmentOpen,
+      enrollmentCloseDate: enrollmentClose,
+      capacity: 30,
+      status: "OPEN" as const,
+      description: "Starting in September 2026 with weekday schedules.",
+    },
+    {
+      name: `${baseName} - October 2026`,
+      slug: `${baseName.toLowerCase().replace(/\s+/g, '-')}-october-2026`,
+      startsAt: new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000),
+      endsAt: new Date(endDate.getTime() + 30 * 24 * 60 * 60 * 1000),
+      enrollmentOpenDate: new Date(enrollmentOpen.getTime() + 30 * 24 * 60 * 60 * 1000),
+      enrollmentCloseDate: new Date(enrollmentClose.getTime() + 30 * 24 * 60 * 60 * 1000),
+      capacity: 25,
+      status: "UPCOMING" as const,
+      description: "Starting in October 2026. Enrollment opens soon.",
+    },
+  ];
+}
+
+function week(title: string, days: string[]) {
+  return { title, days };
+}
+
+export const CATALOG_PROGRAMS: CatalogProgram[] = [
+  {
+    slug: "full-stack",
+    title: "Full Stack Development",
+    summary: "Build practical full-stack skills through a structured internship: interfaces, APIs, data, and a project you can explain.",
+    description:
+      "A supervised path from interface to API to persistence. You practice on weekdays, submit work for review, and finish with a project you can defend — not a list of unrelated tutorials.",
+    durationWeeks: 12,
+    durationLabel: "12 weeks",
+    level: "Beginner",
+    category: "Software",
+    featured: true,
+    availability: "OPEN",
+    audience: "VTU students who want a day-wise software internship with mentor review.",
+    learningApproach: "Each week has a public objective. After enrollment, days include lessons, practice, DDP, and assignments.",
+    learningDaysPerWeek: 5,
+    visualTone: "a",
+    skills: ["HTML", "CSS", "JavaScript", "React", "Node.js", "SQL", "Git", "APIs"],
+    requirements: ["Comfort using a computer and a browser", "Willingness to practice on weekdays"],
+    outcomes: [
+      "Build responsive web interfaces",
+      "Work with APIs",
+      "Build database-backed applications",
+      "Use Git for collaboration",
+      "Deploy a project you can walk through",
+    ],
+    benefits: standardBenefits,
+    faqs: [
+      { title: "Who can join this program?", body: "VTU students who want a supervised, weekday internship in full-stack development. Motivation matters more than prior internships." },
+      { title: "What are the prerequisites?", body: "You should be comfortable with a computer and ready to practice every weekday. Prior HTML is helpful, not required." },
+      { title: "How long is the program?", body: "Twelve weeks, with five learning days each week in a typical batch." },
+      { title: "What will I learn?", body: "Interfaces, JavaScript, APIs, databases, Git, and shipping a project. Exact day topics come from the live curriculum after enrollment." },
+      { title: "Are projects included?", body: "Yes. Mini builds lead to a major project. Submission and review open after you enroll." },
+      { title: "Is mentorship included?", body: "Yes. Assigned mentors support doubts, assignment feedback, and project guidance for enrolled students." },
+      { title: "Will I receive a certificate?", body: "A certificate is issued after evaluation of completed work. It is not granted at signup." },
+    ],
+    weeks: [
+      week("Foundations of the product", ["Orientation and tools", "Page structure", "Layout practice", "Accessibility basics", "Week review"]),
+      week("Interfaces people can use", ["Visual hierarchy", "Components", "Responsive layouts", "Forms", "Interface critique"]),
+      week("Application logic", ["Language fluency", "State in the interface", "Events and flow", "Practice set", "Logic review"]),
+      week("Data and persistence", ["Modeling information", "Queries", "Validation", "Practice set", "Data review"]),
+      week("Connecting the stack", ["HTTP and APIs", "Client integration", "Error handling", "Practice set", "Integration review"]),
+      week("Quality and Git", ["Version control habits", "Reviews", "Testing mindset", "Practice set", "Quality review"]),
+      week("Mini project", ["Scope", "Build", "Iterate", "Write-up", "Mini review"]),
+      week("Major project start", ["Problem framing", "Architecture sketch", "First slice", "Mentor checkpoint", "Plan lock"]),
+      week("Major project build", ["Core flows", "Persistence", "Polish", "Practice day", "Progress review"]),
+      week("Deployment", ["Release basics", "Environments", "Checks", "Practice day", "Release notes"]),
+      week("Portfolio", ["Write-up", "Demo", "Feedback", "Revisions", "Portfolio check"]),
+      week("Evaluation", ["Eligibility review", "Final demo", "Assessment", "Certificate path", "Close"]),
+    ],
+    projects: [
+      { title: "Guided mini build", type: "Mini project", description: "A small product slice that proves a week's skills.", difficulty: "Guided", skills: ["HTML", "CSS", "JavaScript"] },
+      { title: "End-to-end product", type: "Major project", description: "A database-backed application you can demo and explain.", difficulty: "Capstone", skills: ["React", "Node.js", "SQL"] },
+    ],
+    batches: createBatches("Full Stack Development", 12),
+  },
+  {
+    slug: "ai-ml",
+    title: "AI & Machine Learning",
+    summary: "Frame problems, work with data, evaluate models, and present findings with mentor review.",
+    description:
+      "Machine learning as a practice: questions, data, experiments, evaluation, and communication. You leave with notebooks and a project a mentor can challenge — not a placement promise.",
+    durationWeeks: 10,
+    durationLabel: "10 weeks",
+    level: "Intermediate",
+    category: "Intelligence",
+    featured: true,
+    availability: "OPEN",
+    audience: "Students with basic programming who want applied ML experience under mentorship.",
+    learningApproach: "Experiments first. Concepts are taught in service of evaluation and write-ups.",
+    learningDaysPerWeek: 5,
+    visualTone: "b",
+    skills: ["Python", "Data", "Models", "Evaluation", "Notebooks"],
+    requirements: ["Introductory programming", "Undergraduate mathematics comfort"],
+    outcomes: [
+      "Frame an ML problem clearly",
+      "Prepare and inspect datasets",
+      "Evaluate models against a defined metric",
+      "Document experiments",
+      "Present findings a reviewer can challenge",
+    ],
+    benefits: standardBenefits,
+    faqs: [
+      { title: "Who can join this program?", body: "Students with introductory programming who can commit to weekday experiments and write-ups." },
+      { title: "What are the prerequisites?", body: "Programming basics and comfort with undergraduate mathematics. This is not a theory-only course." },
+      { title: "How long is the program?", body: "Ten weeks with five learning days per week in a typical batch." },
+      { title: "Is this a theory-only course?", body: "No. Concepts support experiments, evaluation, and mentor review." },
+      { title: "Are projects included?", body: "Yes. A dataset investigation and an applied model project." },
+      { title: "Is mentorship included?", body: "Yes, for enrolled students: doubts, experiment critique, and project feedback." },
+      { title: "Will I receive a certificate?", body: "After evaluation of completed work, not at enrollment." },
+    ],
+    weeks: [
+      week("Problem framing", ["Questions before models", "Success metrics", "Data ethics intro", "Practice", "Review"]),
+      week("Working with data", ["Sources", "Cleaning", "Splits", "Practice", "Review"]),
+      week("Classical models", ["Baselines", "Fitting", "Comparison", "Practice", "Review"]),
+      week("Evaluation discipline", ["Metrics", "Leakage", "Error analysis", "Practice", "Review"]),
+      week("Feature work", ["Representation", "Iteration", "Ablations", "Practice", "Review"]),
+      week("Applied workflows", ["Pipelines", "Reproducibility", "Reporting", "Practice", "Review"]),
+      week("Project definition", ["Scope", "Dataset lock", "Plan", "Checkpoint", "Review"]),
+      week("Iteration", ["Experiments", "Notes", "Critique", "Practice", "Review"]),
+      week("Presentation", ["Narrative", "Visuals", "Defense", "Revisions", "Review"]),
+      week("Final evaluation", ["Eligibility", "Demo", "Assessment", "Certificate path", "Close"]),
+    ],
+    projects: [
+      { title: "Dataset investigation", type: "Mini project", description: "A documented look at a dataset before any ambitious model.", difficulty: "Guided", skills: ["Python", "Data"] },
+      { title: "Applied model project", type: "Major project", description: "A defined problem, evaluation, and write-up.", difficulty: "Capstone", skills: ["Models", "Evaluation"] },
+    ],
+    batches: createBatches("AI & Machine Learning", 10),
+  },
+  {
+    slug: "python",
+    title: "Python Development",
+    summary: "Write reliable Python, automate work, and deliver scripts and small services other people can run.",
+    description:
+      "Readable Python, testing habits, and small systems. Daily practice plus a project that proves you can finish.",
+    durationWeeks: 8,
+    durationLabel: "8 weeks",
+    level: "Beginner",
+    category: "Software",
+    featured: false,
+    availability: "OPEN",
+    audience: "First- and second-year students who want a disciplined start in Python.",
+    learningApproach: "Short lessons, then scripts you can run again tomorrow.",
+    learningDaysPerWeek: 5,
+    visualTone: "c",
+    skills: ["Python", "Automation", "APIs", "Testing", "Git"],
+    requirements: ["No prior internship required", "Willingness to type every weekday"],
+    outcomes: [
+      "Write readable Python",
+      "Automate a repetitive task",
+      "Call and test APIs",
+      "Use Git on small projects",
+      "Ship a small service or toolchain",
+    ],
+    benefits: standardBenefits,
+    faqs: [
+      { title: "Who can join this program?", body: "Beginners who can attend weekday practice. Prior internship experience is not required." },
+      { title: "What are the prerequisites?", body: "A computer, curiosity, and weekday time. We start from language fluency." },
+      { title: "How long is the program?", body: "Eight weeks, five learning days per week in a typical batch." },
+      { title: "What will I learn?", body: "Python fluency, automation, APIs, testing habits, and a small service." },
+      { title: "Are projects included?", body: "Yes. A utility toolkit and a Python service." },
+      { title: "Is mentorship included?", body: "Yes for enrolled students: doubts and code review." },
+      { title: "Will I receive a certificate?", body: "After evaluation of completed work." },
+    ],
+    weeks: [
+      week("Language fluency", ["Syntax", "Data types", "Control flow", "Practice", "Review"]),
+      week("Working with data", ["Files", "Structures", "Errors", "Practice", "Review"]),
+      week("Automation", ["Scripts", "Scheduling mindset", "Packaging", "Practice", "Review"]),
+      week("Services", ["HTTP", "APIs", "Simple servers", "Practice", "Review"]),
+      week("Testing and Git", ["Assertions", "Version control", "Reviews", "Practice", "Review"]),
+      week("Mini project", ["Scope", "Build", "Tests", "Write-up", "Review"]),
+      week("Major project", ["Design", "Build", "Harden", "Demo", "Review"]),
+      week("Evaluation", ["Eligibility", "Assessment", "Portfolio", "Certificate path", "Close"]),
+    ],
+    projects: [
+      { title: "Utility toolkit", type: "Mini project", description: "Scripts that save a real hour of work.", difficulty: "Guided", skills: ["Python", "Automation"] },
+      { title: "Python service", type: "Major project", description: "A small service others can run with a README.", difficulty: "Capstone", skills: ["APIs", "Testing"] },
+    ],
+    batches: createBatches("Python Development", 8),
+  },
+  {
+    slug: "data-science",
+    title: "Data Science",
+    summary: "Turn messy data into decisions: cleaning, analysis, visualization, and a story a mentor can challenge.",
+    description:
+      "The analysis loop — question, data, method, result, critique. Employment is not guaranteed. Evidence and judgment are.",
+    durationWeeks: 8,
+    durationLabel: "8 weeks",
+    level: "Intermediate",
+    category: "Data",
+    featured: true,
+    availability: "OPEN",
+    audience: "Students who enjoy numbers and want internships that demand judgment, not only charts.",
+    learningApproach: "Write the question first. Charts come second.",
+    learningDaysPerWeek: 5,
+    visualTone: "d",
+    skills: ["Analysis", "Visualization", "SQL", "Reporting", "Python"],
+    requirements: ["Spreadsheet or introductory statistics familiarity", "Willingness to write clearly"],
+    outcomes: [
+      "Frame an analysis question",
+      "Clean and query data",
+      "Visualize without misleading",
+      "Write conclusions a reviewer can test",
+      "Deliver a decision-oriented report",
+    ],
+    benefits: standardBenefits,
+    faqs: [
+      { title: "Who can join this program?", body: "Students comfortable with numbers who can write clearly and attend weekday work." },
+      { title: "Is this the same as machine learning?", body: "No. This internship emphasizes analysis, communication, and evidence. ML has its own program." },
+      { title: "How long is the program?", body: "Eight weeks with five learning days per week in a typical batch." },
+      { title: "What will I learn?", body: "Questions, SQL, visualization, reporting, and a capstone analysis." },
+      { title: "Are projects included?", body: "Yes. An exploratory brief and a decision report." },
+      { title: "Is mentorship included?", body: "Yes for enrolled students: critique of methods and writing." },
+      { title: "Will I receive a certificate?", body: "After evaluation of completed work." },
+    ],
+    weeks: [
+      week("Questions before charts", ["Problem statements", "Bias", "Evidence", "Practice", "Review"]),
+      week("Collecting and cleaning", ["Sources", "Quality", "SQL intro", "Practice", "Review"]),
+      week("Exploratory work", ["Distributions", "Joins", "Checks", "Practice", "Review"]),
+      week("Statistical thinking", ["Comparisons", "Uncertainty", "Limits", "Practice", "Review"]),
+      week("Visual communication", ["Charts", "Annotation", "Honesty", "Practice", "Review"]),
+      week("Stakeholder stories", ["Memos", "Decisions", "Pushback", "Practice", "Review"]),
+      week("Capstone analysis", ["Scope", "Build", "Critique", "Revise", "Review"]),
+      week("Evaluation", ["Eligibility", "Defense", "Assessment", "Certificate path", "Close"]),
+    ],
+    projects: [
+      { title: "Exploratory brief", type: "Mini project", description: "A short, honest look at a dataset.", difficulty: "Guided", skills: ["Analysis", "Visualization"] },
+      { title: "Decision report", type: "Major project", description: "A recommendation a mentor can argue with.", difficulty: "Capstone", skills: ["SQL", "Reporting"] },
+    ],
+    batches: createBatches("Data Science", 8),
+  },
+  {
+    slug: "java",
+    title: "Java Development",
+    summary: "Build reliable Java applications with clear structure, testing habits, and a project you can walk through.",
+    description:
+      "Object-oriented Java used to ship small systems. You practice weekday problems, take reviews seriously, and finish with a project — not a job guarantee.",
+    durationWeeks: 10,
+    durationLabel: "10 weeks",
+    level: "Beginner",
+    category: "Software",
+    featured: false,
+    availability: "OPEN",
+    audience: "VTU students who want a structured Java internship with assignments and mentor review.",
+    learningApproach: "Language first, then APIs and persistence, then a project with tests.",
+    learningDaysPerWeek: 5,
+    visualTone: "a",
+    skills: ["Java", "OOP", "APIs", "SQL", "Git", "Testing"],
+    requirements: ["Comfort with programming fundamentals", "Willingness to write tests"],
+    outcomes: [
+      "Write structured Java",
+      "Model objects and APIs",
+      "Persist data",
+      "Use Git in a team-like workflow",
+      "Present a tested project",
+    ],
+    benefits: standardBenefits,
+    faqs: [
+      { title: "Who can join this program?", body: "Students with programming fundamentals who want a Java internship with weekday practice." },
+      { title: "What are the prerequisites?", body: "Basic programming. Prior Java helps but is not required." },
+      { title: "How long is the program?", body: "Ten weeks, five learning days per week in a typical batch." },
+      { title: "What will I learn?", body: "Java, OOP, APIs, SQL, Git, and testing on a project." },
+      { title: "Are projects included?", body: "Yes. A console toolkit and a service-style Java project." },
+      { title: "Is mentorship included?", body: "Yes for enrolled students." },
+      { title: "Will I receive a certificate?", body: "After evaluation of completed work." },
+    ],
+    weeks: [
+      week("Language core", ["Syntax", "Types", "Control", "Practice", "Review"]),
+      week("Objects", ["Classes", "Design basics", "Collections", "Practice", "Review"]),
+      week("Errors and tests", ["Exceptions", "Unit tests", "Refactor", "Practice", "Review"]),
+      week("APIs", ["HTTP", "JSON", "Clients", "Practice", "Review"]),
+      week("Persistence", ["SQL", "Mapping", "Validation", "Practice", "Review"]),
+      week("Git and reviews", ["Branches", "PRs", "Comments", "Practice", "Review"]),
+      week("Mini project", ["Scope", "Build", "Tests", "Write-up", "Review"]),
+      week("Major project", ["Design", "Build", "Harden", "Demo", "Review"]),
+      week("Polish", ["Docs", "Quality", "Feedback", "Revisions", "Review"]),
+      week("Evaluation", ["Eligibility", "Assessment", "Certificate path", "Close", "Wrap"]),
+    ],
+    projects: [
+      { title: "Console toolkit", type: "Mini project", description: "A small Java tool with tests.", difficulty: "Guided", skills: ["Java", "Testing"] },
+      { title: "Service-style application", type: "Major project", description: "An API-backed Java project with persistence.", difficulty: "Capstone", skills: ["APIs", "SQL"] },
+    ],
+    batches: createBatches("Java Development", 10),
+  },
+  {
+    slug: "ui-ux",
+    title: "UI/UX Design",
+    summary: "Learn to research, structure, and present interfaces that students and mentors can critique.",
+    description:
+      "Design as a practice: users, flows, screens, and critique. You leave with artifacts — not a claim that you will be hired.",
+    durationWeeks: 8,
+    durationLabel: "8 weeks",
+    level: "Beginner",
+    category: "Design",
+    featured: false,
+    availability: "COMING_SOON",
+    audience: "Students who want a structured design internship with weekday critiques.",
+    learningApproach: "Observe, sketch, test with people, then refine. Tools are secondary to judgment.",
+    learningDaysPerWeek: 5,
+    visualTone: "b",
+    skills: ["Research", "Flows", "Wireframes", "UI", "Critique", "Prototyping"],
+    requirements: ["Curiosity about how people use software", "Willingness to show unfinished work"],
+    outcomes: [
+      "Run a lightweight research conversation",
+      "Map a user flow",
+      "Produce wireframes and UI screens",
+      "Take critique without collapsing the work",
+      "Present a design case",
+    ],
+    benefits: standardBenefits,
+    faqs: [
+      { title: "Who can join this program?", body: "Students interested in product interfaces who can take critique in a weekday rhythm." },
+      { title: "What are the prerequisites?", body: "No prior design internship. You must be willing to show unfinished work." },
+      { title: "How long is the program?", body: "Eight weeks with five learning days per week in a typical batch." },
+      { title: "What tools will I use?", body: "Tooling is defined per batch. The public preview does not lock a vendor list." },
+      { title: "Are projects included?", body: "Yes. A flow study and a UI case." },
+      { title: "Is mentorship included?", body: "Yes for enrolled students: critique and project feedback." },
+      { title: "Will I receive a certificate?", body: "After evaluation of completed work." },
+    ],
+    weeks: [
+      week("Seeing users", ["Observation", "Notes", "Assumptions", "Practice", "Review"]),
+      week("Flows", ["Tasks", "Maps", "Gaps", "Practice", "Review"]),
+      week("Wireframes", ["Structure", "Hierarchy", "Content", "Practice", "Review"]),
+      week("Interface", ["Type", "Space", "Components", "Practice", "Review"]),
+      week("Critique", ["Giving", "Receiving", "Revising", "Practice", "Review"]),
+      week("Prototype", ["Fidelity", "Paths", "Tests", "Practice", "Review"]),
+      week("Case build", ["Story", "Screens", "Evidence", "Revisions", "Review"]),
+      week("Evaluation", ["Eligibility", "Defense", "Assessment", "Certificate path", "Close"]),
+    ],
+    projects: [
+      { title: "Flow study", type: "Mini project", description: "A mapped task with evidence from observation.", difficulty: "Guided", skills: ["Research", "Flows"] },
+      { title: "UI case", type: "Major project", description: "Screens plus a critique trail.", difficulty: "Capstone", skills: ["UI", "Prototyping"] },
+    ],
+    batches: [], // No batches for COMING_SOON programs
+  },
+];

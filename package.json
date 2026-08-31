@@ -1,0 +1,24 @@
+{
+  "name": "tesseracareerbridge",
+  "private": true,
+  "version": "0.1.0",
+  "description": "TesseraCareerBridge — internship and career-learning platform",
+  "packageManager": "pnpm@8.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @tesseracareerbridge/server --filter @tesseracareerbridge/client dev",
+    "dev:client": "pnpm --filter @tesseracareerbridge/client dev",
+    "dev:server": "pnpm --filter @tesseracareerbridge/server dev",
+    "build": "pnpm --filter @tesseracareerbridge/shared build && pnpm --filter @tesseracareerbridge/database build && pnpm --filter @tesseracareerbridge/server build && pnpm --filter @tesseracareerbridge/client build",
+    "build:client": "pnpm --filter @tesseracareerbridge/client build",
+    "build:server": "pnpm --filter @tesseracareerbridge/shared build && pnpm --filter @tesseracareerbridge/database build && pnpm --filter @tesseracareerbridge/server build",
+    "db:generate": "pnpm --filter @tesseracareerbridge/database generate",
+    "db:migrate": "pnpm --filter @tesseracareerbridge/database migrate",
+    "db:migrate:deploy": "pnpm --filter @tesseracareerbridge/database migrate:deploy",
+    "db:seed": "pnpm --filter @tesseracareerbridge/database seed",
+    "db:studio": "pnpm --filter @tesseracareerbridge/database studio",
+    "typecheck": "pnpm -r typecheck"
+  }
+}

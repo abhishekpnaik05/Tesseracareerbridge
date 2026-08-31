@@ -1,0 +1,36 @@
+.ds-page {
+  padding: var(--page-pad) 0 var(--space-16);
+}
+
+.ds-section {
+  margin-top: var(--space-12);
+}
+
+.ds-swatches {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.ds-swatch {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.ds-swatch__chip { height: 56px; }
+.ds-swatch figcaption {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-caption);
+  color: var(--color-muted-strong);
+}
+
+.ds-type-sample { margin-bottom: var(--space-4); }
+
+@media (min-width: 768px) {
+  .ds-swatches { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (min-width: 1280px) {
+  .ds-swatches { grid-template-columns: repeat(6, 1fr); }
+}
