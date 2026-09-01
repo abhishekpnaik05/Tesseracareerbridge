@@ -136,11 +136,13 @@ async function main() {
     ],
   });
 
-  await seedCatalog();
+  // Skip catalog seeding in production to avoid connection issues
+  if (process.env.NODE_ENV !== "production") {
+    await seedCatalog();
+    await seedTestEnrollment(student.id);
+  }
 
-  await seedTestEnrollment(student.id);
-
-  console.log("Seeded development users, published programs, and test enrollment (password is SEED_DEV_PASSWORD / DevPass123).");
+  console.log("Seeded development users (password is SEED_DEV_PASSWORD / DevPass123).");
 }
 
 async function seedCatalog() {
@@ -230,45 +232,48 @@ async function seedCatalog() {
     });
 
     for (const batch of item.batches) {
-      const existingBatch = await prisma.batch.findFirst({
+      await prisma.batch.upsert({
         where: { slug: batch.slug },
+        update: {
+          name: batch.name,
+          startsAt: batch.startsAt,
+          endsAt: batch.endsAt,
+          enrollmentOpenDate: batch.enrollmentOpenDate,
+          enrollmentCloseDate: batch.enrollmentCloseDate,
+          capacity: batch.capacity,
+          status: batch.status,
+          description: batch.description,
+        },
+        create: {
+          programId: program.id,
+          name: batch.name,
+          slug: batch.slug,
+          startsAt: batch.startsAt,
+          endsAt: batch.endsAt,
+          enrollmentOpenDate: batch.enrollmentOpenDate,
+          enrollmentCloseDate: batch.enrollmentCloseDate,
+          capacity: batch.capacity,
+          status: batch.status,
+          description: batch.description,
+        },
       });
-
-      if (existingBatch) {
-        await prisma.batch.update({
-          where: { id: existingBatch.id },
-          data: {
-            name: batch.name,
-            startsAt: batch.startsAt,
-            endsAt: batch.endsAt,
-            enrollmentOpenDate: batch.enrollmentOpenDate,
-            enrollmentCloseDate: batch.enrollmentCloseDate,
-            capacity: batch.capacity,
-            status: batch.status,
-            description: batch.description,
-          },
-        });
-      } else {
-        await prisma.batch.create({
-          data: {
-            programId: program.id,
-            name: batch.name,
-            slug: batch.slug,
-            startsAt: batch.startsAt,
-            endsAt: batch.endsAt,
-            enrollmentOpenDate: batch.enrollmentOpenDate,
-            enrollmentCloseDate: batch.enrollmentCloseDate,
-            capacity: batch.capacity,
-            status: batch.status,
-            description: batch.description,
-          },
-        });
-      }
     }
 
     for (const [weekIndex, week] of item.weeks.entries()) {
-      await prisma.week.create({
-        data: {
+      await prisma.week.upsert({
+        where: {
+          programId_index: {
+            programId: program.id,
+            index: weekIndex + 1,
+          },
+        },
+        update: {
+          title: week.title,
+          objective: week.title,
+          description: `Week ${weekIndex + 1}: ${week.title}`,
+          status: "PUBLISHED",
+        },
+        create: {
           programId: program.id,
           index: weekIndex + 1,
           title: week.title,
