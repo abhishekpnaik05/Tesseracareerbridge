@@ -17,7 +17,7 @@ export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
   port: Number(process.env.PORT ?? process.env.SERVER_PORT ?? 4000),
   serverUrl: process.env.SERVER_URL ?? `http://localhost:${process.env.PORT ?? process.env.SERVER_PORT ?? 4000}`,
-  clientUrl: process.env.CLIENT_URL ?? "http://localhost:5173",
+  clientUrl: (process.env.CLIENT_URL ?? "http://localhost:5173").replace(/\/$/, ""),
   apiPrefix: process.env.API_PREFIX ?? "/api/v1",
   databaseUrl: required("DATABASE_URL", "postgresql://tessera:tessera_dev_only@localhost:55432/tesseracareerbridge?schema=public"),
   jwtAccessSecret: required("JWT_ACCESS_SECRET", "change-me-access-secret-min-32-characters"),
