@@ -3,27 +3,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "declaration": false,
     "noEmit": false,
-    "noEmitOnError": false,
-    "types": ["node"],
-    "skipLibCheck": true,
-    "strict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noImplicitAny": false,
-    "strictNullChecks": false,
-    "strictFunctionTypes": false,
-    "strictBindCallApply": false,
-    "strictPropertyInitialization": false,
-    "noImplicitThis": false,
-    "alwaysStrict": false
+    "skipLibCheck": true
   },
-  "include": ["src"],
-  "references": [
-    { "path": "../shared" },
-    { "path": "../database" }
-  ]
+  "include": ["src"]
 }
