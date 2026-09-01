@@ -111,7 +111,7 @@ function calculateDayAvailability(
   return "AVAILABLE";
 }
 
-async function getPreviousAndNextDays(dayId: string, weekId: string, programId: string) {
+async function getPreviousAndNextDays(dayId: string, weekId: string, _programId: string) {
   const currentDay = await prisma.day.findUnique({
     where: { id: dayId },
     select: { index: true },
@@ -148,7 +148,7 @@ async function getPreviousAndNextDays(dayId: string, weekId: string, programId: 
 
 async function getActivityProgress(
   enrollmentId: string,
-  progressId: string,
+  _progressId: string,
   contentType: ContentType,
   contentId: string
 ): Promise<{ status: ActivityStatus; progressPercent: number }> {
@@ -441,7 +441,7 @@ export async function getVideoDetail(
   userId: string
 ): Promise<VideoDto> {
   const enrollment = await getEnrollment(enrollmentId, userId);
-  const day = await getDay(dayId, enrollment.programId);
+  await getDay(dayId, enrollment.programId);
 
   const video = await prisma.video.findFirst({
     where: {
@@ -488,7 +488,7 @@ export async function getNoteDetail(
   userId: string
 ): Promise<NoteDto> {
   const enrollment = await getEnrollment(enrollmentId, userId);
-  const day = await getDay(dayId, enrollment.programId);
+  await getDay(dayId, enrollment.programId);
 
   const note = await prisma.note.findFirst({
     where: {
@@ -528,7 +528,7 @@ export async function getResourceDetail(
   userId: string
 ): Promise<ResourceDto> {
   const enrollment = await getEnrollment(enrollmentId, userId);
-  const day = await getDay(dayId, enrollment.programId);
+  await getDay(dayId, enrollment.programId);
 
   const resource = await prisma.resource.findFirst({
     where: {
@@ -573,7 +573,7 @@ export async function getPracticeTaskDetail(
   userId: string
 ): Promise<PracticeTaskDto> {
   const enrollment = await getEnrollment(enrollmentId, userId);
-  const day = await getDay(dayId, enrollment.programId);
+  await getDay(dayId, enrollment.programId);
 
   const practice = await prisma.practiceTask.findFirst({
     where: {
@@ -612,7 +612,7 @@ export async function getDdpDetail(
   userId: string
 ): Promise<DdpDto> {
   const enrollment = await getEnrollment(enrollmentId, userId);
-  const day = await getDay(dayId, enrollment.programId);
+  await getDay(dayId, enrollment.programId);
 
   const ddp = await prisma.ddp.findFirst({
     where: {
@@ -711,7 +711,7 @@ export async function updateActivityProgress(
   userId: string
 ): Promise<void> {
   const enrollment = await getEnrollment(enrollmentId, userId);
-  const day = await getDay(dayId, enrollment.programId);
+  await getDay(dayId, enrollment.programId);
 
   const dayProgress = await prisma.progress.findUnique({
     where: {

@@ -7,7 +7,7 @@ const guard = [requireAuth, requireActiveAccount] as const;
 
 ddpRouter.get("/days/:dayId", ...guard, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const userId = req.auth!.sub;
+    const _userId = req.auth!.sub;
     const { dayId } = req.params;
     const enrollmentId = req.query.enrollmentId as string;
 
@@ -15,7 +15,7 @@ ddpRouter.get("/days/:dayId", ...guard, async (req: AuthenticatedRequest, res, n
       throw new Error("Enrollment ID is required");
     }
 
-    const ddpData = await ddpService.getDdpForDay(enrollmentId, dayId, userId);
+    const ddpData = await ddpService.getDdpForDay(enrollmentId, dayId, _userId);
     res.json({ data: ddpData });
   } catch (error) {
     next(error);
@@ -24,11 +24,11 @@ ddpRouter.get("/days/:dayId", ...guard, async (req: AuthenticatedRequest, res, n
 
 ddpRouter.post("/:ddpId/start", ...guard, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const userId = req.auth!.sub;
+    const _userId = req.auth!.sub;
     const { ddpId } = req.params;
     const { enrollmentId, dayId } = req.body;
 
-    const attempt = await ddpService.startDdpAttempt(enrollmentId, dayId, ddpId, userId);
+    const attempt = await ddpService.startDdpAttempt(enrollmentId, dayId, ddpId, _userId);
     res.json({ data: attempt });
   } catch (error) {
     next(error);
@@ -37,7 +37,7 @@ ddpRouter.post("/:ddpId/start", ...guard, async (req: AuthenticatedRequest, res,
 
 ddpRouter.get("/attempts/:attemptId/questions", ...guard, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const userId = req.auth!.sub;
+    const _userId = req.auth!.sub;
     const { attemptId } = req.params;
     const enrollmentId = req.query.enrollmentId as string;
 
@@ -45,7 +45,7 @@ ddpRouter.get("/attempts/:attemptId/questions", ...guard, async (req: Authentica
       throw new Error("Enrollment ID is required");
     }
 
-    const questions = await ddpService.getDdpQuestions(attemptId, enrollmentId, userId);
+    const questions = await ddpService.getDdpQuestions(attemptId, enrollmentId, _userId);
     res.json({ data: questions });
   } catch (error) {
     next(error);
@@ -54,7 +54,6 @@ ddpRouter.get("/attempts/:attemptId/questions", ...guard, async (req: Authentica
 
 ddpRouter.put("/attempts/:attemptId/answers/:questionId", ...guard, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const userId = req.auth!.sub;
     const { attemptId, questionId } = req.params;
     const { enrollmentId, selectedOptionIds } = req.body;
 
@@ -67,7 +66,6 @@ ddpRouter.put("/attempts/:attemptId/answers/:questionId", ...guard, async (req: 
 
 ddpRouter.post("/attempts/:attemptId/submit", ...guard, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const userId = req.auth!.sub;
     const { attemptId } = req.params;
     const { enrollmentId } = req.body;
 
@@ -80,7 +78,6 @@ ddpRouter.post("/attempts/:attemptId/submit", ...guard, async (req: Authenticate
 
 ddpRouter.get("/attempts/:attemptId/result", ...guard, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const userId = req.auth!.sub;
     const { attemptId } = req.params;
     const enrollmentId = req.query.enrollmentId as string;
 
@@ -97,7 +94,7 @@ ddpRouter.get("/attempts/:attemptId/result", ...guard, async (req: Authenticated
 
 ddpRouter.get("/:ddpId/history", ...guard, async (req: AuthenticatedRequest, res, next) => {
   try {
-    const userId = req.auth!.sub;
+    const _userId = req.auth!.sub;
     const { ddpId } = req.params;
     const enrollmentId = req.query.enrollmentId as string;
 
@@ -105,7 +102,7 @@ ddpRouter.get("/:ddpId/history", ...guard, async (req: AuthenticatedRequest, res
       throw new Error("Enrollment ID is required");
     }
 
-    const history = await ddpService.getDdpAttemptHistory(ddpId, enrollmentId, userId);
+    const history = await ddpService.getDdpAttemptHistory(ddpId, enrollmentId, _userId);
     res.json({ data: history });
   } catch (error) {
     next(error);

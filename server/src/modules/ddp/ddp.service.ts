@@ -216,7 +216,7 @@ export async function getDdpForDay(enrollmentId: string, dayId: string, userId: 
 
 export async function startDdpAttempt(enrollmentId: string, dayId: string, ddpId: string, userId: string) {
   const enrollment = await getEnrollment(enrollmentId, userId);
-  const day = await getDay(dayId, enrollment.programId);
+  await getDay(dayId, enrollment.programId);
   const ddp = await getDdp(ddpId, enrollment.programId);
 
   // Check attempt limit
@@ -260,7 +260,7 @@ export async function startDdpAttempt(enrollmentId: string, dayId: string, ddpId
   };
 }
 
-export async function getDdpQuestions(attemptId: string, enrollmentId: string, userId: string) {
+export async function getDdpQuestions(attemptId: string, enrollmentId: string, _userId: string) {
   const attempt = await prisma.ddpAttempt.findUnique({
     where: { id: attemptId },
     include: {
