@@ -10,8 +10,8 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@tesseracareerbridge/shared": ["../shared/src"],
-      "@tesseracareerbridge/database": ["../database/src"]
+      "@tesseracareerbridge/shared": ["../shared/dist"],
+      "@tesseracareerbridge/database": ["../database/dist"]
     }
   },
   "include": ["src"]
