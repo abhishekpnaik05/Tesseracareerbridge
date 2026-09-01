@@ -8,7 +8,6 @@
     "declaration": false,
     "noEmit": false,
     "types": ["node"],
-    "baseUrl": ".",
     "paths": {
       "@tesseracareerbridge/shared": ["../shared/dist"],
       "@tesseracareerbridge/database": ["../database/dist"]
