@@ -7,7 +7,12 @@
     "moduleResolution": "NodeNext",
     "declaration": false,
     "noEmit": false,
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@tesseracareerbridge/shared": ["../shared/src"],
+      "@tesseracareerbridge/database": ["../database/src"]
+    }
   },
   "include": ["src"]
 }
