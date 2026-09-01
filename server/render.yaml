@@ -3,8 +3,8 @@ services:
     name: tessera-backend
     env: node
     plan: free
-    buildCommand: pnpm install --no-frozen-lockfile && cd shared && pnpm build && cd ../database && pnpm build && cd ../server && pnpm build
-    startCommand: node server/dist/index.js
+    buildCommand: pnpm install --no-frozen-lockfile
+    startCommand: pnpm --filter @tesseracareerbridge/server start
     envVars:
       - key: NODE_ENV
         value: production
