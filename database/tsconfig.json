@@ -5,8 +5,9 @@
     "rootDir": "src",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "noEmit": false,
-    "composite": true
+    "composite": true,
+    "declaration": true,
+    "noEmit": false
   },
   "include": ["src", "prisma/seed.ts"]
 }
