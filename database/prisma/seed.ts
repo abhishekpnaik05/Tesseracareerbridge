@@ -34,10 +34,8 @@ async function upsertUser(input: {
 }
 
 async function main() {
-  if (process.env.NODE_ENV === "production") {
-    console.log("Skipping development user seed in production.");
-    return;
-  }
+  // Seed users in both development and production
+  console.log("Seeding users...");
 
   const student = await upsertUser({
     email: "student@tesseracareerbridge.dev",
