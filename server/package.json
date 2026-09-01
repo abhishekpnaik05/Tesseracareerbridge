@@ -12,6 +12,11 @@
   "dependencies": {
     "@tesseracareerbridge/database": "workspace:*",
     "@tesseracareerbridge/shared": "workspace:*",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.13.10",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
@@ -22,11 +27,6 @@
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^3.0.0",
-    "@types/cookie-parser": "^1.4.10",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/jsonwebtoken": "^9.0.9",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   }
