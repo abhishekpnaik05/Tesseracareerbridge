@@ -136,13 +136,13 @@ async function main() {
     ],
   });
 
-  // Skip catalog seeding in production to avoid connection issues
-  if (process.env.NODE_ENV !== "production") {
-    await seedCatalog();
-    await seedTestEnrollment(student.id);
-  }
+  // Seed catalog in production
+  await seedCatalog();
 
-  console.log("Seeded development users (password is SEED_DEV_PASSWORD / DevPass123).");
+  // Seed test enrollment for student
+  await seedTestEnrollment(student.id);
+
+  console.log("Seeded development users, published programs, and test enrollment (password is SEED_DEV_PASSWORD / DevPass123).");
 }
 
 async function seedCatalog() {
@@ -260,38 +260,45 @@ async function seedCatalog() {
     }
 
     for (const [weekIndex, week] of item.weeks.entries()) {
-      await prisma.week.upsert({
+      const existingWeek = await prisma.week.findFirst({
         where: {
-          programId_index: {
-            programId: program.id,
-            index: weekIndex + 1,
-          },
-        },
-        update: {
-          title: week.title,
-          objective: week.title,
-          description: `Week ${weekIndex + 1}: ${week.title}`,
-          status: "PUBLISHED",
-        },
-        create: {
           programId: program.id,
           index: weekIndex + 1,
-          title: week.title,
-          objective: week.title,
-          description: `Week ${weekIndex + 1}: ${week.title}`,
-          status: "PUBLISHED",
-          days: {
-            create: week.days.map((title, dayIndex) => ({
-              index: dayIndex + 1,
-              title,
-              objective: title,
-              description: `Day ${dayIndex + 1}: ${title}`,
-              estimatedDuration: 120,
-              status: "PUBLISHED",
-            })),
-          },
         },
       });
+
+      if (existingWeek) {
+        await prisma.week.update({
+          where: { id: existingWeek.id },
+          data: {
+            title: week.title,
+            objective: week.title,
+            description: `Week ${weekIndex + 1}: ${week.title}`,
+            status: "PUBLISHED",
+          },
+        });
+      } else {
+        await prisma.week.create({
+          data: {
+            programId: program.id,
+            index: weekIndex + 1,
+            title: week.title,
+            objective: week.title,
+            description: `Week ${weekIndex + 1}: ${week.title}`,
+            status: "PUBLISHED",
+            days: {
+              create: week.days.map((title, dayIndex) => ({
+                index: dayIndex + 1,
+                title,
+                objective: title,
+                description: `Day ${dayIndex + 1}: ${title}`,
+                estimatedDuration: 120,
+                status: "PUBLISHED",
+              })),
+            },
+          },
+        });
+      }
     }
   }
 
@@ -560,8 +567,21 @@ async function seedLearningContent(programId: string, enrollmentId: string) {
         // Mark video as completed
         const video = await prisma.video.findFirst({ where: { dayId: day.id } });
         if (video) {
-          await prisma.studentActivityProgress.create({
-            data: {
+          await prisma.studentActivityProgress.upsert({
+            where: {
+              enrollmentId_contentType_contentId: {
+                enrollmentId,
+                contentType: "VIDEO",
+                contentId: video.id,
+              },
+            },
+            update: {
+              status: "COMPLETED",
+              progressPercent: 100,
+              lastAccessedAt: new Date(),
+              completedAt: new Date(),
+            },
+            create: {
               enrollmentId,
               progressId: dayProgress.id,
               contentType: "VIDEO",
@@ -578,8 +598,21 @@ async function seedLearningContent(programId: string, enrollmentId: string) {
         // Mark note as completed
         const note = await prisma.note.findFirst({ where: { dayId: day.id } });
         if (note) {
-          await prisma.studentActivityProgress.create({
-            data: {
+          await prisma.studentActivityProgress.upsert({
+            where: {
+              enrollmentId_contentType_contentId: {
+                enrollmentId,
+                contentType: "NOTE",
+                contentId: note.id,
+              },
+            },
+            update: {
+              status: "COMPLETED",
+              progressPercent: 100,
+              lastAccessedAt: new Date(),
+              completedAt: new Date(),
+            },
+            create: {
               enrollmentId,
               progressId: dayProgress.id,
               contentType: "NOTE",
