@@ -14,5 +14,9 @@
     "noUnusedParameters": false,
     "noImplicitAny": false
   },
-  "include": ["src"]
+  "include": ["src"],
+  "references": [
+    { "path": "../shared" },
+    { "path": "../database" }
+  ]
 }

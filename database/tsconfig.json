@@ -9,5 +9,5 @@
     "declaration": true,
     "noEmit": false
   },
-  "include": ["src", "prisma/seed.ts"]
+  "include": ["src"]
 }
