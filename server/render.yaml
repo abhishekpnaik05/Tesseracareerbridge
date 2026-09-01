@@ -16,8 +16,6 @@ services:
         sync: false
       - key: API_PREFIX
         value: /api/v1
-      - key: SERVER_PORT
-        value: 4000
       - key: STORAGE_DRIVER
         value: local
       - key: STORAGE_LOCAL_ROOT
