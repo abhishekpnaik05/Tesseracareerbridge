@@ -1,0 +1,11 @@
+{
+  "buildCommand": "pnpm --filter @tesseracareerbridge/shared build && pnpm --filter @tesseracareerbridge/client build",
+  "outputDirectory": "client/dist",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

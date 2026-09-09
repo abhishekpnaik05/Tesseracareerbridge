@@ -7,7 +7,7 @@ import { LoadingState, EmptyState, Button, Input } from "../../components/ui";
 export function AdminProgramEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [program, setProgram] = useState<AdminProgramDetail | null>(null);
+  const [_program, setProgram] = useState<AdminProgramDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
