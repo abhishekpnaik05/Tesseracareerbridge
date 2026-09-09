@@ -4,7 +4,7 @@ import { PageMeta } from "../components/seo/PageMeta";
 import { Alert, Button, Checkbox, Field, Input, PasswordInput, ProgressBar } from "../components/ui";
 import { AuthScreen } from "../components/auth/AuthScreen";
 import { apiPost, ApiRequestError } from "../lib/api";
-import { EMAIL_PATTERN, PHONE_PATTERN, passwordIssue, passwordStrength } from "../lib/password";
+import { EMAIL_PATTERN, PHONE_PATTERN, passwordIssue, passwordStrength, maskEmail } from "../lib/password";
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -55,6 +55,7 @@ export function RegisterPage() {
       navigate("/verify-email", {
         state: {
           email: data.user.email,
+          maskedEmail: maskEmail(data.user.email),
           devOtp: data.devOtp,
           token: data.devVerificationToken,
         },

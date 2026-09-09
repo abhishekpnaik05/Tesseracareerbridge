@@ -86,6 +86,24 @@ a.ui-btn--outline:hover {
   color: var(--color-white);
 }
 
+.ui-btn--warning {
+  background: var(--color-warning);
+  color: var(--color-white);
+}
+
+.ui-btn--warning:hover:not(:disabled) {
+  background: #f59e0b;
+}
+
+.ui-btn--success {
+  background: var(--color-success);
+  color: #09090B;
+}
+
+.ui-btn--success:hover:not(:disabled) {
+  background: #22c55e;
+}
+
 .ui-btn--link {
   background: transparent;
   color: var(--color-amber);
@@ -100,15 +118,6 @@ a.ui-btn--outline:hover {
 
 .ui-btn--accent:hover:not(:disabled) {
   background: var(--color-amber-bright);
-}
-
-.ui-btn--success {
-  background: var(--color-success);
-  color: #09090B;
-}
-
-.ui-btn--success:hover:not(:disabled) {
-  background: #22c55e;
 }
 
 .ui-btn--sm { min-height: 40px; padding: 0 var(--space-4); font-size: var(--text-caption); }
@@ -650,3 +659,48 @@ a.ui-btn--outline:hover {
 .stack { display: grid; gap: var(--form-gap); }
 .row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
 .icon { display: inline-flex; flex-shrink: 0; }
+
+/* OTP Input */
+.ui-otp-input {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+  margin: var(--space-4) 0;
+}
+
+.ui-otp-input__digit {
+  width: 48px;
+  height: 56px;
+  font-size: 24px;
+  font-weight: var(--weight-semibold);
+  text-align: center;
+  background: var(--color-bg-warm);
+  color: var(--color-white);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: all var(--transition);
+}
+
+.ui-otp-input__digit:focus {
+  outline: none;
+  border-color: var(--color-amber);
+  box-shadow: 0 0 0 3px rgba(245, 168, 63, 0.1);
+}
+
+.ui-otp-input__digit--focused {
+  border-color: var(--color-amber);
+  box-shadow: 0 0 0 3px rgba(245, 168, 63, 0.1);
+}
+
+.ui-otp-input__digit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .ui-otp-input__digit {
+    width: 40px;
+    height: 48px;
+    font-size: 20px;
+  }
+}

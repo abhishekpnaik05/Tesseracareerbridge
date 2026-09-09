@@ -2,8 +2,9 @@ import { Router } from "express";
 import { API_ROUTES } from "@tesseracareerbridge/shared";
 import { createModuleRouter } from "./_foundation.js";
 import { authRouter } from "./auth/auth.router.js";
-import { adminsRouter, mentorsRouter } from "./accounts/accounts.router.js";
+import { mentorsRouter } from "./accounts/accounts.router.js";
 import { studentsRouter } from "./students/students.router.js";
+import { adminRouter } from "./admin/admin.router.js";
 import { programsRouter } from "./programs/programs.router.js";
 import { batchesRouter } from "./batches/batches.router.js";
 import { enrollmentsRouter } from "./enrollments/enrollments.router.js";
@@ -11,13 +12,14 @@ import { curriculumRouter } from "./curriculum/curriculum.router.js";
 import { ddpRouter } from "./ddp/ddp.router.js";
 import { assignmentsRouter } from "./assignments/assignments.router.js";
 import { notificationsRouter } from "./notifications/notifications.router.js";
+import { mentorRouter } from "./mentor/mentor.router.js";
 
 export function registerModules(api: Router) {
   api.use(API_ROUTES.auth, authRouter);
   api.use(API_ROUTES.users, createModuleRouter("Users"));
   api.use(API_ROUTES.students, studentsRouter);
   api.use(API_ROUTES.mentors, mentorsRouter);
-  api.use(API_ROUTES.admins, adminsRouter);
+  api.use(API_ROUTES.admins, adminRouter);
   api.use(API_ROUTES.programs, programsRouter);
   api.use(API_ROUTES.batches, batchesRouter);
   api.use(API_ROUTES.enrollments, enrollmentsRouter);
@@ -34,4 +36,5 @@ export function registerModules(api: Router) {
   api.use(API_ROUTES.certificates, createModuleRouter("Certificates"));
   api.use(API_ROUTES.analytics, createModuleRouter("Analytics"));
   api.use(API_ROUTES.payments, createModuleRouter("Payments"));
+  api.use(API_ROUTES.mentor, mentorRouter);
 }

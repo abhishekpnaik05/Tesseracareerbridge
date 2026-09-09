@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../");
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../");
 dotenv.config({ path: path.join(rootDir, ".env") });
 
 function required(name: string, fallback?: string): string {
@@ -27,4 +27,10 @@ export const env = {
   storageDriver: process.env.STORAGE_DRIVER ?? "local",
   storageLocalRoot: process.env.STORAGE_LOCAL_ROOT ?? "./storage/local",
   storagePublicBaseUrl: process.env.STORAGE_PUBLIC_BASE_URL ?? `http://localhost:${process.env.PORT ?? process.env.SERVER_PORT ?? 4000}/storage`,
+  smtpHost: process.env.SMTP_HOST,
+  smtpPort: process.env.SMTP_PORT,
+  smtpUser: process.env.SMTP_USER,
+  smtpPassword: process.env.SMTP_PASSWORD,
+  emailFrom: process.env.EMAIL_FROM,
+  resendApiKey: process.env.RESEND_API_KEY,
 };

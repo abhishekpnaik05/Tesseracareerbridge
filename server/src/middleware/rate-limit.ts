@@ -20,3 +20,4 @@ export const loginLimiter = limiter(15 * 60 * 1000, 10);
 export const registerLimiter = limiter(60 * 60 * 1000, 8);
 export const forgotLimiter = limiter(15 * 60 * 1000, 5);
 export const verifyLimiter = limiter(15 * 60 * 1000, 12);
+export const resendLimiter = limiter(60 * 1000, 3); // 3 requests per minute for resend

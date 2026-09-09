@@ -34,6 +34,38 @@ import { StudentDayPage } from "./pages/student/StudentDayPage";
 import { StudentDdpPage } from "./pages/student/StudentDdpPage";
 import { StudentAssignmentPage } from "./pages/student/StudentAssignmentPage";
 import { FoundationPage } from "./components/FoundationPage";
+import { MentorDashboardPage } from "./pages/mentor/MentorDashboardPage";
+import { MentorInternshipsPage } from "./pages/mentor/MentorInternshipsPage";
+import { MentorInternshipDetailPage } from "./pages/mentor/MentorInternshipDetailPage";
+import { MentorInternshipDesignerPage } from "./pages/mentor/MentorInternshipDesignerPage";
+import { MentorStudentsPage } from "./pages/mentor/MentorStudentsPage";
+import { MentorAttendancePage } from "./pages/mentor/MentorAttendancePage";
+import { MentorAssignmentsPage } from "./pages/mentor/MentorAssignmentsPage";
+import { MentorDdpResultsPage } from "./pages/mentor/MentorDdpResultsPage";
+import { MentorDoubtsPage } from "./pages/mentor/MentorDoubtsPage";
+import { MentorAnnouncementsPage } from "./pages/mentor/MentorAnnouncementsPage";
+import { MentorProfilePage } from "./pages/mentor/MentorProfilePage";
+import { MentorNotificationsPage } from "./pages/mentor/MentorNotificationsPage";
+import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
+import { AdminStudentsPage } from "./pages/admin/AdminStudentsPage";
+import { AdminStudentDetailPage } from "./pages/admin/AdminStudentDetailPage";
+import { AdminMentorsPage } from "./pages/admin/AdminMentorsPage";
+import { AdminMentorDetailPage } from "./pages/admin/AdminMentorDetailPage";
+import { AdminProgramsPage } from "./pages/admin/AdminProgramsPage";
+import { AdminProgramDetailPage } from "./pages/admin/AdminProgramDetailPage";
+import { AdminProgramEditPage } from "./pages/admin/AdminProgramEditPage";
+import { AdminBatchesPage } from "./pages/admin/AdminBatchesPage";
+import { AdminBatchEditPage } from "./pages/admin/AdminBatchEditPage";
+import { AdminEnrollmentsPage } from "./pages/admin/AdminEnrollmentsPage";
+import { AdminAttendancePage } from "./pages/admin/AdminAttendancePage";
+import { AdminAnnouncementsPage } from "./pages/admin/AdminAnnouncementsPage";
+import { AdminReportsPage } from "./pages/admin/AdminReportsPage";
+import { AdminInternshipsPage } from "./pages/admin/AdminInternshipsPage";
+import { AdminInternshipDetailPage } from "./pages/admin/AdminInternshipDetailPage";
+import { AdminInternshipCreatePage } from "./pages/admin/AdminInternshipCreatePage";
+import { AdminDdpPage } from "./pages/admin/AdminDdpPage";
+import { AdminAssignmentsPage } from "./pages/admin/AdminAssignmentsPage";
+import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage";
 
 export function AppRoutes() {
   return (
@@ -92,39 +124,54 @@ export function AppRoutes() {
 
       <Route element={<RequireAuth roles={["MENTOR"]} />}>
         <Route path="/mentor" element={<MentorLayout />}>
-        <Route index element={<FoundationPageWrap area="Mentor" title="Overview" summary="Assigned batches and review queue." />} />
-        <Route path="batches" element={<FoundationPageWrap area="Mentor" title="Batches" summary="Batches assigned to this mentor." />} />
-        <Route path="students" element={<FoundationPageWrap area="Mentor" title="Students" summary="Students in assigned batches." />} />
-        <Route path="doubts" element={<FoundationPageWrap area="Mentor" title="Doubts" summary="Doubt threads for assigned students." />} />
-        <Route path="assignments" element={<FoundationPageWrap area="Mentor" title="Assignments" summary="Assignment review for assigned batches." />} />
-        <Route path="projects" element={<FoundationPageWrap area="Mentor" title="Projects" summary="Project review for assigned batches." />} />
-        <Route path="evaluations" element={<FoundationPageWrap area="Mentor" title="Evaluations" summary="Scores and feedback." />} />
-        <Route path="sessions" element={<FoundationPageWrap area="Mentor" title="Sessions" summary="Mentorship sessions." />} />
-        <Route path="notifications" element={<FoundationPageWrap area="Mentor" title="Notifications" summary="Mentor notifications." />} />
-        <Route path="profile" element={<FoundationPageWrap area="Mentor" title="Profile" summary="Mentor profile." />} />
+        <Route index element={<MentorDashboardPage />} />
+        <Route path="internships" element={<MentorInternshipsPage />} />
+        <Route path="internships/:id" element={<MentorInternshipDetailPage />} />
+        <Route path="internships/:id/design" element={<MentorInternshipDesignerPage />} />
+        <Route path="internships/design" element={<MentorInternshipDesignerPage />} />
+        <Route path="students" element={<MentorStudentsPage />} />
+        <Route path="attendance" element={<MentorAttendancePage />} />
+        <Route path="assignments" element={<MentorAssignmentsPage />} />
+        <Route path="ddp-results" element={<MentorDdpResultsPage />} />
+        <Route path="doubts" element={<MentorDoubtsPage />} />
+        <Route path="announcements" element={<MentorAnnouncementsPage />} />
+        <Route path="profile" element={<MentorProfilePage />} />
+        <Route path="notifications" element={<MentorNotificationsPage />} />
         </Route>
       </Route>
 
       <Route element={<RequireAuth roles={["ADMIN", "CONTENT_MANAGER", "SUPER_ADMIN"]} />}>
         <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<FoundationPageWrap area="Admin" title="Overview" summary="Operations overview. Super Admin has full access." />} />
-        <Route path="students" element={<FoundationPageWrap area="Admin" title="Students" summary="Student directory." />} />
-        <Route path="programs" element={<FoundationPageWrap area="Admin" title="Programs" summary="Create and publish programs." />} />
-        <Route path="batches" element={<FoundationPageWrap area="Admin" title="Batches" summary="Batch management." />} />
-        <Route path="mentors" element={<FoundationPageWrap area="Admin" title="Mentors" summary="Mentor assignment." />} />
+        <Route index element={<AdminDashboardPage />} />
+        <Route path="students" element={<AdminStudentsPage />} />
+        <Route path="students/:studentId" element={<AdminStudentDetailPage />} />
+        <Route path="programs" element={<AdminProgramsPage />} />
+        <Route path="programs/create" element={<AdminProgramEditPage />} />
+        <Route path="programs/:id" element={<AdminProgramDetailPage />} />
+        <Route path="programs/:id/edit" element={<AdminProgramEditPage />} />
+        <Route path="batches" element={<AdminBatchesPage />} />
+        <Route path="batches/:id" element={<AdminInternshipDetailPage />} />
+        <Route path="batches/:id/edit" element={<AdminBatchEditPage />} />
+        <Route path="mentors" element={<AdminMentorsPage />} />
+        <Route path="mentors/:mentorId" element={<AdminMentorDetailPage />} />
+        <Route path="enrollments" element={<AdminEnrollmentsPage />} />
+        <Route path="attendance" element={<AdminAttendancePage />} />
+        <Route path="announcements" element={<AdminAnnouncementsPage />} />
+        <Route path="reports" element={<AdminReportsPage />} />
+        <Route path="internships" element={<AdminInternshipsPage />} />
+        <Route path="internships/new" element={<AdminInternshipCreatePage />} />
+        <Route path="internships/:id" element={<AdminInternshipDetailPage />} />
+        <Route path="ddp" element={<AdminDdpPage />} />
+        <Route path="assignments" element={<AdminAssignmentsPage />} />
+        <Route path="settings" element={<AdminSettingsPage />} />
         <Route path="curriculum" element={<FoundationPageWrap area="Admin" title="Curriculum" summary="Weeks and days. Never hard-coded in the client." />} />
         <Route path="content" element={<FoundationPageWrap area="Admin" title="Content" summary="Videos, notes, and resources via object storage." />} />
-        <Route path="ddp" element={<FoundationPageWrap area="Admin" title="DDP" summary="DDP authoring." />} />
-        <Route path="assignments" element={<FoundationPageWrap area="Admin" title="Assignments" summary="Assignment authoring." />} />
         <Route path="tests" element={<FoundationPageWrap area="Admin" title="Tests" summary="Test authoring." />} />
         <Route path="projects" element={<FoundationPageWrap area="Admin" title="Projects" summary="Project authoring." />} />
         <Route path="evaluations" element={<FoundationPageWrap area="Admin" title="Evaluations" summary="Evaluation oversight." />} />
-        <Route path="attendance" element={<FoundationPageWrap area="Admin" title="Attendance" summary="Attendance administration." />} />
         <Route path="certificates" element={<FoundationPageWrap area="Admin" title="Certificates" summary="Issuance and verification." />} />
         <Route path="notifications" element={<FoundationPageWrap area="Admin" title="Notifications" summary="Announcements and notifications." />} />
         <Route path="analytics" element={<FoundationPageWrap area="Admin" title="Analytics" summary="Platform analytics." />} />
-        <Route path="reports" element={<FoundationPageWrap area="Admin" title="Reports" summary="Operational reports." />} />
-        <Route path="settings" element={<FoundationPageWrap area="Admin" title="Settings" summary="System settings." />} />
         </Route>
       </Route>
 

@@ -140,6 +140,7 @@ model AuthChallenge {
   otpHash   String?
   expiresAt DateTime
   usedAt    DateTime?
+  attempts  Int               @default(0)
   createdAt DateTime          @default(now())
 
   @@index([userId, type])
@@ -508,23 +509,23 @@ model StudentActivityProgress {
 }
 
 model Ddp {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   programId       String
-  program         Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  program         Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
   dayId           String?
-  day             Day?     @relation(fields: [dayId], references: [id], onDelete: SetNull)
+  day             Day?      @relation(fields: [dayId], references: [id], onDelete: SetNull)
   title           String
   description     String?
   instructions    String?
-  durationMinutes Int      @default(15)
-  passingScore    Int      @default(70)
-  maxAttempts     Int      @default(3)
+  durationMinutes Int       @default(15)
+  passingScore    Int       @default(70)
+  maxAttempts     Int       @default(3)
   randomizeQuestions Boolean @default(false)
   randomizeOptions   Boolean @default(false)
-  required        Boolean  @default(true)
-  status          String   @default("DRAFT")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  required        Boolean   @default(true)
+  status          String    @default("DRAFT")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   questions DdpQuestion[]
   attempts  DdpAttempt[]

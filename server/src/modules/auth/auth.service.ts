@@ -11,11 +11,15 @@ import {
   randomToken,
   verifyPassword,
 } from "../../lib/crypto.js";
-import { lastDevMessage, logMailer } from "../../services/mailer.js";
+import { lastDevMessage, getMailer } from "../../services/mailer.js";
 import { signAccessToken } from "../../middleware/auth.js";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE = /^[0-9+\-\s]{10,16}$/;
+
+// Resend cooldown tracking (in-memory, 60 seconds)
+const resendCooldowns = new Map<string, number>();
+const RESEND_COOLDOWN_MS = 60 * 1000; // 60 seconds
 
 export function toAuthUser(user: User): AuthUser {
   return {
@@ -73,15 +77,66 @@ export async function registerStudent(input: {
   });
 
   const challenge = await createChallenge(user.id, "EMAIL_VERIFY");
-  await logMailer.send({
-    to: email,
-    subject: "Verify your TesseraCareerBridge account",
-    text: `Verification code: ${challenge.otp}\n${env.clientUrl}/verify-email?token=${challenge.token}`,
-  });
+  const mailer = getMailer();
+  const verificationUrl = `${env.clientUrl}/verify-email?token=${challenge.token}`;
+  try {
+    await mailer.send({
+      to: email,
+      subject: "Verify your TesseraCareerBridge account",
+      text: `Hello ${name},
+
+Thank you for creating your TesseraCareerBridge account.
+
+Your verification code is: ${challenge.otp}
+
+This code expires in 10 minutes.
+
+If you did not create this account, you can safely ignore this email.
+
+---
+TesseraCareerBridge
+${verificationUrl}`,
+      html: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify your TesseraCareerBridge account</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+    <h1 style="color: white; margin: 0; font-size: 28px;">TesseraCareerBridge</h1>
+  </div>
+  <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #e0e0e0; border-top: none;">
+    <h2 style="color: #333; margin-top: 0;">Verify your email address</h2>
+    <p>Hello ${name},</p>
+    <p>Thank you for creating your TesseraCareerBridge account.</p>
+    <p style="font-size: 18px; font-weight: bold; color: #667eea;">Your verification code is:</p>
+    <div style="background: white; border: 2px solid #667eea; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+      <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #333;">${challenge.otp}</span>
+    </div>
+    <p>This code expires in 10 minutes.</p>
+    <p style="color: #666; font-size: 14px;">If you did not create this account, you can safely ignore this email.</p>
+    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+    <p style="color: #666; font-size: 12px; text-align: center;">
+      © 2024 TesseraCareerBridge. All rights reserved.<br>
+      Need help? Contact our support team.
+    </p>
+  </div>
+</body>
+</html>`,
+    });
+  } catch {
+    // Email sending failed — registration still succeeded.
+    // The user can request a new verification email from the verify page.
+  }
+
+  // Only return dev OTP if using logMailer (no email provider configured)
+  const isUsingDevMailer = !env.resendApiKey && !(env.smtpHost && env.smtpPort && env.smtpUser && env.smtpPassword);
 
   return {
     user: toAuthUser(user),
-    ...(env.nodeEnv !== "production"
+    ...(isUsingDevMailer
       ? { devVerificationToken: challenge.token, devOtp: challenge.otp }
       : {}),
   };
@@ -90,7 +145,7 @@ export async function registerStudent(input: {
 async function createChallenge(userId: string, type: "EMAIL_VERIFY" | "PASSWORD_RESET") {
   const token = randomToken();
   const otp = randomOtp();
-  const hours = type === "EMAIL_VERIFY" ? 24 : 1;
+  const minutes = type === "EMAIL_VERIFY" ? 10 : 60;
   await prisma.authChallenge.updateMany({
     where: { userId, type, usedAt: null },
     data: { usedAt: new Date() },
@@ -101,7 +156,7 @@ async function createChallenge(userId: string, type: "EMAIL_VERIFY" | "PASSWORD_
       type,
       tokenHash: hashToken(token),
       otpHash: hashToken(otp),
-      expiresAt: new Date(Date.now() + hours * 60 * 60 * 1000),
+      expiresAt: new Date(Date.now() + minutes * 60 * 1000),
     },
   });
   return { token, otp };
@@ -232,15 +287,73 @@ export async function verifyEmail(token?: string, otp?: string, email?: string) 
 export async function resendVerification(emailRaw: string) {
   const email = emailRaw.trim().toLowerCase();
   if (!EMAIL.test(email)) throw new HttpError(400, "VALIDATION", "Enter a valid email.");
+  
+  // Check resend cooldown
+  const now = Date.now();
+  const lastResendTime = resendCooldowns.get(email);
+  if (lastResendTime && now - lastResendTime < RESEND_COOLDOWN_MS) {
+    const remainingSeconds = Math.ceil((RESEND_COOLDOWN_MS - (now - lastResendTime)) / 1000);
+    throw new HttpError(429, "RESEND_COOLDOWN", `Please wait ${remainingSeconds} seconds before requesting another code.`);
+  }
+  
   const user = await prisma.user.findUnique({ where: { email } });
   if (user && !user.emailVerifiedAt && user.status !== "DISABLED" && user.status !== "SUSPENDED") {
     const challenge = await createChallenge(user.id, "EMAIL_VERIFY");
-    await logMailer.send({
+    const mailer = getMailer();
+    const verificationUrl = `${env.clientUrl}/verify-email?token=${challenge.token}`;
+    await mailer.send({
       to: email,
       subject: "Verify your TesseraCareerBridge account",
-      text: `Verification code: ${challenge.otp}\n${env.clientUrl}/verify-email?token=${challenge.token}`,
+      text: `Hello ${user.displayName},
+
+Thank you for creating your TesseraCareerBridge account.
+
+Your verification code is: ${challenge.otp}
+
+This code expires in 10 minutes.
+
+If you did not create this account, you can safely ignore this email.
+
+---
+TesseraCareerBridge
+${verificationUrl}`,
+      html: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify your TesseraCareerBridge account</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+    <h1 style="color: white; margin: 0; font-size: 28px;">TesseraCareerBridge</h1>
+  </div>
+  <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #e0e0e0; border-top: none;">
+    <h2 style="color: #333; margin-top: 0;">Verify your email address</h2>
+    <p>Hello ${user.displayName},</p>
+    <p>Thank you for creating your TesseraCareerBridge account.</p>
+    <p style="font-size: 18px; font-weight: bold; color: #667eea;">Your verification code is:</p>
+    <div style="background: white; border: 2px solid #667eea; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+      <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #333;">${challenge.otp}</span>
+    </div>
+    <p>This code expires in 10 minutes.</p>
+    <p style="color: #666; font-size: 14px;">If you did not create this account, you can safely ignore this email.</p>
+    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+    <p style="color: #666; font-size: 12px; text-align: center;">
+      © 2024 TesseraCareerBridge. All rights reserved.<br>
+      Need help? Contact our support team.
+    </p>
+  </div>
+</body>
+</html>`,
     });
-    return env.nodeEnv !== "production"
+    // Set cooldown
+    resendCooldowns.set(email, now);
+    
+    // Only return dev OTP if using logMailer (no email provider configured)
+    const isUsingDevMailer = !env.resendApiKey && !(env.smtpHost && env.smtpPort && env.smtpUser && env.smtpPassword);
+    
+    return isUsingDevMailer
       ? { message: "If an account needs verification, we issued a new code.", devVerificationToken: challenge.token, devOtp: challenge.otp }
       : { message: "If an account needs verification, we issued a new code." };
   }
@@ -260,12 +373,58 @@ export async function forgotPassword(emailRaw: string) {
   };
   if (user && user.status !== "DISABLED") {
     const challenge = await createChallenge(user.id, "PASSWORD_RESET");
-    await logMailer.send({
+    const mailer = getMailer();
+    const resetUrl = `${env.clientUrl}/reset-password?token=${challenge.token}`;
+    await mailer.send({
       to: email,
       subject: "Reset your TesseraCareerBridge password",
-      text: `Reset code: ${challenge.otp}\n${env.clientUrl}/reset-password?token=${challenge.token}`,
+      text: `Hello ${user.displayName},
+
+We received a request to reset your password for your TesseraCareerBridge account.
+
+Your password reset code is: ${challenge.otp}
+
+This code expires in 60 minutes.
+
+If you did not request this password reset, you can safely ignore this email.
+
+---
+TesseraCareerBridge
+${resetUrl}`,
+      html: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset your TesseraCareerBridge password</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+    <h1 style="color: white; margin: 0; font-size: 28px;">TesseraCareerBridge</h1>
+  </div>
+  <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #e0e0e0; border-top: none;">
+    <h2 style="color: #333; margin-top: 0;">Reset your password</h2>
+    <p>Hello ${user.displayName},</p>
+    <p>We received a request to reset your password for your TesseraCareerBridge account.</p>
+    <p style="font-size: 18px; font-weight: bold; color: #667eea;">Your password reset code is:</p>
+    <div style="background: white; border: 2px solid #667eea; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+      <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #333;">${challenge.otp}</span>
+    </div>
+    <p>This code expires in 60 minutes.</p>
+    <p style="color: #666; font-size: 14px;">If you did not request this password reset, you can safely ignore this email.</p>
+    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+    <p style="color: #666; font-size: 12px; text-align: center;">
+      © 2024 TesseraCareerBridge. All rights reserved.<br>
+      Need help? Contact our support team.
+    </p>
+  </div>
+</body>
+</html>`,
     });
-    if (env.nodeEnv !== "production") {
+    
+    // Only return dev OTP if using logMailer (no email provider configured)
+    const isUsingDevMailer = !env.resendApiKey && !(env.smtpHost && env.smtpPort && env.smtpUser && env.smtpPassword);
+    if (isUsingDevMailer) {
       payload.devResetToken = challenge.token;
       payload.devOtp = challenge.otp;
     }
@@ -354,9 +513,31 @@ async function findChallenge(
     where: { type, userId: user.id, usedAt: null, expiresAt: { gt: now } },
     orderBy: { createdAt: "desc" },
   });
-  if (!row || !row.otpHash || row.otpHash !== hashToken(otp ?? "")) {
+  if (!row || !row.otpHash) {
     throw new HttpError(400, "INVALID_TOKEN", "This link or code is invalid or has expired.");
   }
+  
+  // Check max attempts (5 attempts allowed)
+  if (row.attempts >= 5) {
+    await prisma.authChallenge.update({ where: { id: row.id }, data: { usedAt: new Date() } });
+    throw new HttpError(400, "TOO_MANY_ATTEMPTS", "Too many incorrect attempts. Please request a new code.");
+  }
+  
+  // Check OTP before incrementing attempts
+  if (row.otpHash !== hashToken(otp ?? "")) {
+    // Increment attempts for incorrect OTP
+    const updatedRow = await prisma.authChallenge.update({ 
+      where: { id: row.id }, 
+      data: { attempts: row.attempts + 1 } 
+    });
+    const remainingAttempts = 5 - updatedRow.attempts;
+    if (remainingAttempts > 0) {
+      throw new HttpError(400, "INVALID_TOKEN", `Invalid verification code. ${remainingAttempts} attempts remaining.`);
+    } else {
+      throw new HttpError(400, "TOO_MANY_ATTEMPTS", "Too many incorrect attempts. Please request a new code.");
+    }
+  }
+  
   return row;
 }
 

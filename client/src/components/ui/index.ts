@@ -1,5 +1,5 @@
 export { Button, ButtonLink } from "./Button";
-export { Field, Input, PasswordInput, SearchInput, Textarea, Select, Checkbox, Radio, Switch, FileUpload } from "./FormControls";
+export { Field, Input, PasswordInput, SearchInput, Textarea, Select, Checkbox, Radio, Switch, FileUpload, OtpInput } from "./FormControls";
 export {
   Card,
   Badge,

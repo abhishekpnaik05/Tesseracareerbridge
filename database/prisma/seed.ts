@@ -10,7 +10,7 @@ async function upsertUser(input: {
   role: "STUDENT" | "MENTOR" | "ADMIN" | "CONTENT_MANAGER" | "SUPER_ADMIN";
   phone: string;
 }) {
-  const passwordHash = await bcrypt.hash(DEV_PASSWORD, 12);
+  const passwordHash = await bcrypt.hash(DEV_PASSWORD, 6); // low cost for seed speed; real users use cost 12
   return prisma.user.upsert({
     where: { email: input.email },
     update: {
@@ -326,6 +326,31 @@ async function seedTestEnrollment(studentId: string) {
   }
 
   const batch = fullStackProgram.batches[0];
+
+  // Assign mentor to the batch
+  const mentorUser = await prisma.user.findUnique({
+    where: { email: "mentor@tesseracareerbridge.dev" },
+    include: { mentorProfile: true },
+  });
+
+  if (mentorUser && mentorUser.mentorProfile) {
+    const existingMentorship = await prisma.batchMentor.findFirst({
+      where: {
+        batchId: batch.id,
+        mentorId: mentorUser.mentorProfile.id,
+      },
+    });
+
+    if (!existingMentorship) {
+      await prisma.batchMentor.create({
+        data: {
+          batchId: batch.id,
+          mentorId: mentorUser.mentorProfile.id,
+        },
+      });
+      console.log(`Assigned mentor ${mentorUser.email} to batch ${batch.name}`);
+    }
+  }
 
   const existingEnrollment = await prisma.enrollment.findFirst({
     where: {

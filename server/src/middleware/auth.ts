@@ -92,3 +92,31 @@ export function signAccessToken(payload: JwtPayload): string {
     expiresIn: env.jwtAccessExpiresIn as jwt.SignOptions["expiresIn"],
   });
 }
+
+export async function requireMentorRole(
+  req: AuthenticatedRequest,
+  _res: Response,
+  next: NextFunction,
+) {
+  if (!req.auth) {
+    next(new HttpError(401, "UNAUTHENTICATED", "Your session has expired. Please log in again."));
+    return;
+  }
+  
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.auth.sub } });
+    if (!user) {
+      next(new HttpError(401, "UNAUTHENTICATED", "Your session has expired. Please log in again."));
+      return;
+    }
+    
+    if (user.role !== "MENTOR" && user.role !== "SUPER_ADMIN") {
+      next(new HttpError(403, "FORBIDDEN", "You do not have mentor access to this resource."));
+      return;
+    }
+    
+    next();
+  } catch (error) {
+    next(error);
+  }
+}

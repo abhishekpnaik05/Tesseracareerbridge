@@ -18,3 +18,13 @@ export function passwordStrength(password: string): { score: number; label: stri
 
 export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const PHONE_PATTERN = /^[0-9+\-\s]{10,16}$/;
+
+export function maskEmail(email: string): string {
+  if (!email || !email.includes('@')) return email;
+  
+  const [localPart, domain] = email.split('@');
+  if (localPart.length <= 2) return email;
+  
+  const maskedLocal = localPart[0] + '*'.repeat(localPart.length - 2) + localPart[localPart.length - 1];
+  return `${maskedLocal}@${domain}`;
+}

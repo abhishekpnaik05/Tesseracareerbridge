@@ -23,6 +23,7 @@ export const API_ROUTES = {
   certificates: "/certificates",
   analytics: "/analytics",
   payments: "/payments",
+  mentor: "/mentor",
 } as const;
 
 export const BATCH_ROUTES = {

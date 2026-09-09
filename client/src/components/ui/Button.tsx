@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "../../lib/cn";
 
-export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger" | "link" | "accent" | "success";
+export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger" | "link" | "accent" | "success" | "warning";
 export type ButtonSize = "sm" | "md" | "lg";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

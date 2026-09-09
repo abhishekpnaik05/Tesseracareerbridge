@@ -5,6 +5,8 @@
 @import "./design-system.css";
 @import "./public.css";
 @import "./student.css";
+@import "./mentor.css";
+@import "./admin.css";
 
 *,
 *::before,

@@ -30,7 +30,12 @@ async function parse<T>(response: Response): Promise<T> {
 
 function shouldRefresh(path: string, status: number) {
   if (status !== 401) return false;
-  return !path.startsWith("/auth/login") && !path.startsWith("/auth/refresh") && !path.startsWith("/auth/register");
+  return (
+    !path.startsWith("/auth/login") &&
+    !path.startsWith("/auth/refresh") &&
+    !path.startsWith("/auth/register") &&
+    !path.startsWith("/auth/me")
+  );
 }
 
 async function refreshSession(): Promise<boolean> {

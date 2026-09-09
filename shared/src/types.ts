@@ -699,3 +699,529 @@ export interface DdpHistoryDto {
     submittedAt: string | null;
   }>;
 }
+
+// Admin Types
+export interface AdminDashboardDto {
+  totalStudents: number;
+  activeStudents: number;
+  totalMentors: number;
+  activeMentors: number;
+  totalPrograms: number;
+  activePrograms: number;
+  totalBatches: number;
+  activeBatches: number;
+  totalEnrollments: number;
+  activeEnrollments: number;
+  todayAttendance: {
+    total: number;
+    present: number;
+    absent: number;
+    percentage: number;
+  };
+  pendingReviews: number;
+  recentAnnouncements: Array<{
+    id: string;
+    title: string;
+    createdAt: string;
+  }>;
+}
+
+export interface AdminStudentListItem {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  program: string | null;
+  batch: string | null;
+  status: string;
+  progress: number | null;
+  attendance: number | null;
+}
+
+export interface AdminStudentDetail {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  university: string | null;
+  branch: string | null;
+  semester: number | null;
+  status: string;
+  enrollments: Array<{
+    id: string;
+    programTitle: string;
+    batchName: string;
+    status: string;
+    enrolledAt: string;
+    progress: number;
+  }>;
+  progress: {
+    overallPercent: number;
+    weeksCompleted: number;
+    daysCompleted: number;
+  };
+  attendance: {
+    present: number;
+    absent: number;
+    percentage: number;
+  };
+  ddpPerformance: {
+    averageScore: number;
+    completed: number;
+    passed: number;
+    failed: number;
+  };
+  assignmentPerformance: {
+    submitted: number;
+    pending: number;
+    reviewed: number;
+    averageScore: number;
+  };
+}
+
+export interface AdminMentorListItem {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  title: string | null;
+  status: string;
+  assignedBatches: number;
+  assignedStudents: number;
+}
+
+export interface AdminMentorDetail {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  title: string | null;
+  bio: string | null;
+  phone: string | null;
+  skills: string | null;
+  experience: string | null;
+  linkedin: string | null;
+  github: string | null;
+  status: string;
+  assignedInternships: Array<{
+    id: string;
+    programTitle: string;
+    batchName: string;
+    assignedAt: string;
+  }>;
+  assignedBatches: number;
+  studentCount: number;
+  recentActivity: Array<{
+    type: string;
+    description: string;
+    createdAt: string;
+  }>;
+}
+
+export interface AdminProgramListItem {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  durationWeeks: number | null;
+  level: string | null;
+  category: string | null;
+  status: string;
+  featured: boolean;
+  batchCount: number;
+  enrollmentCount: number;
+}
+
+export interface AdminProgramDetail {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  description: string | null;
+  durationWeeks: number | null;
+  durationLabel: string | null;
+  level: string | null;
+  category: string | null;
+  audience: string | null;
+  learningApproach: string | null;
+  learningDaysPerWeek: number | null;
+  status: string;
+  featured: boolean;
+  availability: string;
+  skills: string[];
+  outcomes: string[];
+  requirements: string[];
+  batchCount: number;
+  enrollmentCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminBatchListItem {
+  id: string;
+  name: string;
+  slug: string | null;
+  programId: string;
+  programTitle: string;
+  startsAt: string | null;
+  endsAt: string | null;
+  status: string;
+  capacity: number | null;
+  enrolledCount: number;
+  mentor: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+export interface AdminBatchDetail {
+  id: string;
+  name: string;
+  slug: string | null;
+  programId: string;
+  programTitle: string;
+  startsAt: string | null;
+  endsAt: string | null;
+  enrollmentOpenDate: string | null;
+  enrollmentCloseDate: string | null;
+  status: string;
+  capacity: number | null;
+  enrolledCount: number;
+  description: string | null;
+  mentor: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+  students: Array<{
+    id: string;
+    name: string;
+    email: string;
+    status: string;
+    progress: number;
+  }>;
+}
+
+export interface AdminEnrollmentListItem {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  programId: string;
+  programTitle: string;
+  batchId: string;
+  batchName: string;
+  status: string;
+  enrolledAt: string;
+  progress: number;
+}
+
+export interface AdminEnrollmentDetail {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  programId: string;
+  programTitle: string;
+  batchId: string;
+  batchName: string;
+  mentorId: string | null;
+  mentorName: string | null;
+  status: string;
+  enrolledAt: string;
+  activatedAt: string | null;
+  completedAt: string | null;
+  progress: number;
+  currentDay: number | null;
+  totalDays: number | null;
+  attendance: {
+    present: number;
+    absent: number;
+    percentage: number;
+  };
+  ddpPerformance: {
+    averageScore: number;
+    completed: number;
+    passed: number;
+  };
+  assignmentPerformance: {
+    submitted: number;
+    reviewed: number;
+    averageScore: number;
+  };
+}
+
+export interface TodayAttendanceDto {
+  date: string;
+  totalStudents: number;
+  present: number;
+  absent: number;
+  percentage: number;
+}
+
+export interface BatchAttendanceDto {
+  batchId: string;
+  batchName: string;
+  programId: string;
+  programTitle: string;
+  date: string;
+  students: Array<{
+    studentId: string;
+    studentName: string;
+    studentEmail: string;
+    status: string;
+    markedBy: string | null;
+    updatedAt: string | null;
+  }>;
+}
+
+export interface StudentAttendanceHistoryDto {
+  studentId: string;
+  studentName: string;
+  records: Array<{
+    date: string;
+    status: string;
+  }>;
+  summary: {
+    total: number;
+    present: number;
+    absent: number;
+    percentage: number;
+  };
+}
+
+export interface AdminAnnouncementListItem {
+  id: string;
+  title: string;
+  body: string;
+  priority: string;
+  audience: string;
+  batchId: string | null;
+  batchName: string | null;
+  authorId: string;
+  authorName: string;
+  createdAt: string;
+}
+
+export interface AttendanceReportDto {
+  byBatch: Array<{
+    batchId: string;
+    batchName: string;
+    present: number;
+    absent: number;
+    percentage: number;
+  }>;
+  byStudent: Array<{
+    studentId: string;
+    studentName: string;
+    present: number;
+    absent: number;
+    percentage: number;
+  }>;
+  byDate: Array<{
+    date: string;
+    present: number;
+    absent: number;
+    percentage: number;
+  }>;
+}
+
+export interface DdpReportDto {
+  byDdp: Array<{
+    ddpId: string;
+    ddpTitle: string;
+    attempts: number;
+    averageScore: number;
+    passRate: number;
+  }>;
+  byStudent: Array<{
+    studentId: string;
+    studentName: string;
+    averageScore: number;
+    completed: number;
+    passed: number;
+  }>;
+}
+
+export interface AssignmentReportDto {
+  byAssignment: Array<{
+    assignmentId: string;
+    assignmentTitle: string;
+    submissions: number;
+    pendingReviews: number;
+    reviewed: number;
+    averageScore: number;
+    resubmissions: number;
+  }>;
+  byStudent: Array<{
+    studentId: string;
+    studentName: string;
+    submitted: number;
+    averageScore: number;
+  }>;
+}
+
+export interface InternshipProgressReportDto {
+  byInternship: Array<{
+    batchId: string;
+    batchName: string;
+    students: number;
+    averageProgress: number;
+    completedDays: number;
+    ddpCompletion: number;
+    assignmentCompletion: number;
+  }>;
+}
+
+// Internship Creation Types
+export const INTERNSHIP_STATUSES = ["DRAFT", "REGISTRATION_OPEN", "UPCOMING", "ACTIVE", "COMPLETED", "ARCHIVED"] as const;
+export type InternshipStatus = (typeof INTERNSHIP_STATUSES)[number];
+
+export const INTERNSHIP_CATEGORIES = ["Software Development", "Data Science", "Cloud Computing", "DevOps", "Cybersecurity", "AI/ML", "Mobile Development", "Web Development", "Other"] as const;
+export type InternshipCategory = (typeof INTERNSHIP_CATEGORIES)[number];
+
+export const INTERNSHIP_TYPES = ["Full-time", "Part-time", "Remote", "Hybrid", "On-site"] as const;
+export type InternshipType = (typeof INTERNSHIP_TYPES)[number];
+
+export const DIFFICULTY_LEVELS = ["Beginner", "Intermediate", "Advanced"] as const;
+export type DifficultyLevel = (typeof DIFFICULTY_LEVELS)[number];
+
+export const BATCH_ASSIGNMENT_METHODS = ["AUTOMATIC", "MANUAL", "PENDING_APPROVAL"] as const;
+export type BatchAssignmentMethod = (typeof BATCH_ASSIGNMENT_METHODS)[number];
+
+export interface InternshipBasicDetails {
+  name: string;
+  code: string;
+  description: string;
+  category: InternshipCategory;
+  type: InternshipType;
+  department: string;
+  skillArea: string;
+  difficultyLevel: DifficultyLevel;
+  durationWeeks: number;
+  startDate: string;
+  endDate: string;
+  registrationStartDate: string;
+  registrationEndDate: string;
+  maxStudents: number;
+  status: InternshipStatus;
+}
+
+export interface InternshipProgramInfo {
+  overview: string;
+  objectives: string[];
+  whatStudentsWillLearn: string[];
+  skillsDeveloped: string[];
+  prerequisites: string[];
+  eligibilityCriteria: string[];
+  expectedOutcomes: string[];
+  certificateInfo: string;
+  guidelines: string;
+  termsConditions: string;
+}
+
+export interface WeekStructure {
+  weekNumber: number;
+  title: string;
+  description: string;
+}
+
+export interface InternshipCurriculumStructure {
+  totalWeeks: number;
+  weeks: WeekStructure[];
+}
+
+export interface MentorInfo {
+  id: string;
+  name: string;
+  email: string;
+  expertise: string[];
+  currentInternships: number;
+  currentStudentCount: number;
+  availability: string;
+}
+
+export interface InternshipBatchSetup {
+  batchName: string;
+  batchCode: string;
+  startDate: string;
+  endDate: string;
+  maxCapacity: number;
+  assignedMentorId: string;
+  enrollmentStatus: string;
+}
+
+export interface InternshipEnrollmentConfig {
+  whoCanEnroll: string;
+  maxStudents: number;
+  registrationRequirement: string;
+  approvalRequired: boolean;
+  enrollmentStartDate: string;
+  enrollmentEndDate: string;
+  eligibilityCriteria: string[];
+  batchAssignmentMethod: BatchAssignmentMethod;
+}
+
+export interface InternshipResource {
+  title: string;
+  type: string;
+  fileKey?: string;
+  url?: string;
+  description?: string;
+}
+
+export interface InternshipAnnouncementSetup {
+  title: string;
+  body: string;
+  priority: "NORMAL" | "IMPORTANT" | "URGENT";
+  targetAudience: "STUDENTS" | "SPECIFIC_PROGRAM" | "SPECIFIC_INTERNSHIP" | "SPECIFIC_BATCH";
+  sendImmediately: boolean;
+}
+
+export interface CreateInternshipRequest {
+  basicDetails: InternshipBasicDetails;
+  programInfo: InternshipProgramInfo;
+  curriculumStructure: InternshipCurriculumStructure;
+  batchSetup: InternshipBatchSetup;
+  enrollmentConfig: InternshipEnrollmentConfig;
+  resources?: InternshipResource[];
+  announcement?: InternshipAnnouncementSetup | null;
+}
+
+export interface InternshipCreationSummary {
+  internship: {
+    name: string;
+    code: string;
+    category: string;
+    duration: number;
+    startDate: string;
+    endDate: string;
+    status: string;
+  };
+  program: {
+    description: string;
+    objectives: string[];
+    skills: string[];
+    eligibility: string[];
+  };
+  structure: {
+    totalWeeks: number;
+    weekNames: string[];
+  };
+  mentor: {
+    name: string;
+    email: string;
+  };
+  batch: {
+    name: string;
+    dates: { start: string; end: string };
+    capacity: number;
+  };
+  enrollment: {
+    registrationDates: { start: string; end: string };
+    maxStudents: number;
+    approvalSettings: string;
+  };
+  resources: InternshipResource[];
+}

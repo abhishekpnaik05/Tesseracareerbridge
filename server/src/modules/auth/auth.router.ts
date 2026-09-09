@@ -2,7 +2,7 @@ import { Router } from "express";
 import type { Response } from "express";
 import { env } from "../../config/env.js";
 import { clearAuthCookies, setAccessCookie, setAuthCookies, REFRESH_COOKIE } from "../../lib/cookies.js";
-import { forgotLimiter, loginLimiter, registerLimiter, verifyLimiter } from "../../middleware/rate-limit.js";
+import { forgotLimiter, loginLimiter, registerLimiter, resendLimiter, verifyLimiter } from "../../middleware/rate-limit.js";
 import { requireAuth, type AuthenticatedRequest } from "../../middleware/auth.js";
 import * as auth from "./auth.service.js";
 
@@ -84,7 +84,7 @@ authRouter.post("/verify", verifyLimiter, async (req, res, next) => {
   }
 });
 
-authRouter.post("/resend-verification", verifyLimiter, async (req, res, next) => {
+authRouter.post("/resend-verification", resendLimiter, async (req, res, next) => {
   try {
     const email = typeof req.body?.email === "string" ? req.body.email : "";
     const data = await auth.resendVerification(email);

@@ -117,3 +117,78 @@ export function FileUpload({ label = "Choose file", ...props }: InputHTMLAttribu
     </label>
   );
 }
+
+interface OtpInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  length?: number;
+  disabled?: boolean;
+  autoFocus?: boolean;
+}
+
+export function OtpInput({ value, onChange, length = 6, disabled = false, autoFocus = false }: OtpInputProps) {
+  const [focusedIndex, setFocusedIndex] = useState<number>(autoFocus ? 0 : -1);
+
+  const handleChange = (index: number, digit: string) => {
+    if (!/^\d*$/.test(digit)) return; // Only allow digits
+    
+    const newValue = value.split('');
+    newValue[index] = digit;
+    const result = newValue.join('').slice(0, length);
+    onChange(result);
+    
+    // Auto-focus next input
+    if (digit && index < length - 1) {
+      setFocusedIndex(index + 1);
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !value[index] && index > 0) {
+      setFocusedIndex(index - 1);
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      setFocusedIndex(index - 1);
+    } else if (e.key === 'ArrowRight' && index < length - 1) {
+      setFocusedIndex(index + 1);
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, length);
+    if (pastedData) {
+      onChange(pastedData);
+      setFocusedIndex(pastedData.length);
+    }
+  };
+
+  const handleFocus = (index: number) => {
+    setFocusedIndex(index);
+  };
+
+  return (
+    <div className="ui-otp-input">
+      {Array.from({ length }).map((_, index) => (
+        <input
+          key={index}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={1}
+          value={value[index] || ''}
+          onChange={(e) => handleChange(index, e.target.value)}
+          onKeyDown={(e) => handleKeyDown(index, e)}
+          onPaste={handlePaste}
+          onFocus={() => handleFocus(index)}
+          disabled={disabled}
+          autoFocus={focusedIndex === index}
+          className={cn(
+            "ui-otp-input__digit",
+            focusedIndex === index && "ui-otp-input__digit--focused"
+          )}
+          aria-label={`Digit ${index + 1}`}
+        />
+      ))}
+    </div>
+  );
+}

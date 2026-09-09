@@ -1,38 +1,66 @@
 import {
   Bell,
+  BookOpen,
   ClipboardList,
-  FolderKanban,
   Home,
   LayoutDashboard,
   MessageCircle,
   Users,
   UserRound,
-  Video,
+  CalendarCheck,
+  Trophy,
 } from "lucide-react";
 import { AppShell, type AppNavGroup, type AppNavItem } from "./AppLayout";
 
 const groups: AppNavGroup[] = [
   {
+    label: "Overview",
     items: [
       { to: "/mentor", label: "Dashboard", icon: LayoutDashboard, end: true },
-      { to: "/mentor/batches", label: "My Batches", icon: Home },
+    ],
+  },
+  {
+    label: "My Internships",
+    items: [
+      { to: "/mentor/internships", label: "My Internships", icon: Home },
+      { to: "/mentor/internships/design", label: "Internship Designer", icon: BookOpen },
+    ],
+  },
+  {
+    label: "Students",
+    items: [
       { to: "/mentor/students", label: "Students", icon: Users },
+      { to: "/mentor/attendance", label: "Attendance", icon: CalendarCheck },
+    ],
+  },
+  {
+    label: "Reviews",
+    items: [
+      { to: "/mentor/assignments", label: "Assignment Reviews", icon: ClipboardList },
+      { to: "/mentor/ddp-results", label: "DDP Results", icon: Trophy },
+    ],
+  },
+  {
+    label: "Communication",
+    items: [
       { to: "/mentor/doubts", label: "Doubts", icon: MessageCircle },
-      { to: "/mentor/assignments", label: "Assignments", icon: ClipboardList },
-      { to: "/mentor/projects", label: "Projects", icon: FolderKanban },
-      { to: "/mentor/evaluations", label: "Evaluations", icon: ClipboardList },
-      { to: "/mentor/sessions", label: "Sessions", icon: Video },
-      { to: "/mentor/notifications", label: "Notifications", icon: Bell },
+      { to: "/mentor/announcements", label: "Announcements", icon: Bell },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
       { to: "/mentor/profile", label: "Profile", icon: UserRound },
+      { to: "/mentor/notifications", label: "Notifications", icon: Bell },
     ],
   },
 ];
 
 const mobileLinks: AppNavItem[] = [
-  { to: "/mentor", label: "Home", icon: LayoutDashboard, end: true },
-  { to: "/mentor/batches", label: "Batches", icon: Home },
-  { to: "/mentor/evaluations", label: "Review", icon: ClipboardList },
+  { to: "/mentor", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/mentor/internships", label: "Internships", icon: Home },
   { to: "/mentor/students", label: "Students", icon: Users },
+  { to: "/mentor/assignments", label: "Reviews", icon: ClipboardList },
 ];
 
 export function MentorLayout() {
