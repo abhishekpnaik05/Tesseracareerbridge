@@ -33,4 +33,14 @@ export const env = {
   smtpPassword: process.env.SMTP_PASSWORD,
   emailFrom: process.env.EMAIL_FROM,
   resendApiKey: process.env.RESEND_API_KEY,
+  // SMS Provider Configuration
+  twilioAccountSid: process.env.TWILIO_ACCOUNT_SID,
+  twilioAuthToken: process.env.TWILIO_AUTH_TOKEN,
+  twilioPhoneNumber: process.env.TWILIO_PHONE_NUMBER,
+  msg91AuthKey: process.env.MSG91_AUTH_KEY,
+  msg91SenderId: process.env.MSG91_SENDER_ID,
+  // WhatsApp Provider Configuration
+  twilioWhatsAppNumber: process.env.TWILIO_WHATSAPP_NUMBER,
+  metaWhatsAppAccessToken: process.env.META_WHATSAPP_ACCESS_TOKEN,
+  metaWhatsAppPhoneNumberId: process.env.META_WHATSAPP_PHONE_NUMBER_ID,
 };

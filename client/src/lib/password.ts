@@ -28,3 +28,19 @@ export function maskEmail(email: string): string {
   const maskedLocal = localPart[0] + '*'.repeat(localPart.length - 2) + localPart[localPart.length - 1];
   return `${maskedLocal}@${domain}`;
 }
+
+export function maskPhone(phone: string): string {
+  if (!phone) return phone;
+  
+  // Remove all non-digit characters
+  const digits = phone.replace(/\D/g, '');
+  
+  if (digits.length <= 4) return phone;
+  
+  // Show first 2 and last 4 digits, mask the rest
+  const visibleStart = digits.slice(0, 2);
+  const visibleEnd = digits.slice(-4);
+  const masked = '*'.repeat(digits.length - 6);
+  
+  return `${visibleStart}${masked}${visibleEnd}`;
+}

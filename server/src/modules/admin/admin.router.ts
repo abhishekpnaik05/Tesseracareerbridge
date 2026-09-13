@@ -605,3 +605,185 @@ adminRouter.get(
     }
   }
 );
+
+// Curriculum Management
+adminRouter.get(
+  "/curriculum",
+  requireAuth,
+  requireActiveAccount,
+  requireRoles("ADMIN", "CONTENT_MANAGER", "SUPER_ADMIN"),
+  async (req: AuthenticatedRequest, res, next) => {
+    try {
+      const params = {
+        programId: req.query.programId as string | undefined
+      };
+      const result = await adminService.getCurriculum(params);
+      res.json({ data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Content Management
+adminRouter.get(
+  "/content",
+  requireAuth,
+  requireActiveAccount,
+  requireRoles("ADMIN", "CONTENT_MANAGER", "SUPER_ADMIN"),
+  async (req: AuthenticatedRequest, res, next) => {
+    try {
+      const params = {
+        programId: req.query.programId as string | undefined,
+        type: req.query.type as string | undefined
+      };
+      const result = await adminService.getContent(params);
+      res.json({ data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Tests Management
+adminRouter.get(
+  "/tests",
+  requireAuth,
+  requireActiveAccount,
+  requireRoles("ADMIN", "CONTENT_MANAGER", "SUPER_ADMIN"),
+  async (req: AuthenticatedRequest, res, next) => {
+    try {
+      const params = {
+        programId: req.query.programId as string | undefined,
+        status: req.query.status as string | undefined
+      };
+      const result = await adminService.getTests(params);
+      res.json({ data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Projects Management
+adminRouter.get(
+  "/projects",
+  requireAuth,
+  requireActiveAccount,
+  requireRoles("ADMIN", "CONTENT_MANAGER", "SUPER_ADMIN"),
+  async (req: AuthenticatedRequest, res, next) => {
+    try {
+      const params = {
+        programId: req.query.programId as string | undefined,
+        status: req.query.status as string | undefined
+      };
+      const result = await adminService.getProjects(params);
+      res.json({ data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Evaluations Management
+adminRouter.get(
+  "/evaluations",
+  requireAuth,
+  requireActiveAccount,
+  requireRoles("ADMIN", "CONTENT_MANAGER", "SUPER_ADMIN"),
+  async (req: AuthenticatedRequest, res, next) => {
+    try {
+      const params = {
+        programId: req.query.programId as string | undefined,
+        batchId: req.query.batchId as string | undefined,
+        status: req.query.status as string | undefined
+      };
+      const result = await adminService.getEvaluations(params);
+      res.json({ data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Certificates Management
+adminRouter.get(
+  "/certificates",
+  requireAuth,
+  requireActiveAccount,
+  requireRoles("ADMIN", "CONTENT_MANAGER", "SUPER_ADMIN"),
+  async (req: AuthenticatedRequest, res, next) => {
+    try {
+      const params = {
+        programId: req.query.programId as string | undefined,
+        status: req.query.status as string | undefined
+      };
+      const result = await adminService.getCertificates(params);
+      res.json({ data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Analytics
+adminRouter.get(
+  "/analytics/metrics",
+  requireAuth,
+  requireActiveAccount,
+  requireRoles("ADMIN", "CONTENT_MANAGER", "SUPER_ADMIN"),
+  async (_req: AuthenticatedRequest, res, next) => {
+    try {
+      const result = await adminService.getAnalyticsMetrics();
+      res.json({ data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+adminRouter.get(
+  "/analytics/by-program",
+  requireAuth,
+  requireActiveAccount,
+  requireRoles("ADMIN", "CONTENT_MANAGER", "SUPER_ADMIN"),
+  async (_req: AuthenticatedRequest, res, next) => {
+    try {
+      const result = await adminService.getAnalyticsByProgram();
+      res.json({ data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+adminRouter.get(
+  "/analytics/by-batch",
+  requireAuth,
+  requireActiveAccount,
+  requireRoles("ADMIN", "CONTENT_MANAGER", "SUPER_ADMIN"),
+  async (_req: AuthenticatedRequest, res, next) => {
+    try {
+      const result = await adminService.getAnalyticsByBatch();
+      res.json({ data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+adminRouter.get(
+  "/analytics/over-time",
+  requireAuth,
+  requireActiveAccount,
+  requireRoles("ADMIN", "CONTENT_MANAGER", "SUPER_ADMIN"),
+  async (req: AuthenticatedRequest, res, next) => {
+    try {
+      const { days } = req.query;
+      const result = await adminService.getAnalyticsOverTime(days ? parseInt(days as string) : 30);
+      res.json({ data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);

@@ -415,7 +415,7 @@ export async function createWeek(userId: string, data: any) {
   const week = await prisma.week.create({
     data: {
       programId,
-      index: weekNumber,
+      index: weekNumber, // Store as 0-based index
       title,
       description,
       status: status || "DRAFT",
@@ -424,7 +424,7 @@ export async function createWeek(userId: string, data: any) {
 
   return {
     id: week.id,
-    weekNumber: week.index + 1,
+    weekNumber: week.index + 1, // Return as 1-based for display
     title: week.title,
     description: week.description,
     status: week.status,
@@ -458,7 +458,7 @@ export async function updateWeek(weekId: string, userId: string, data: any) {
 
   return {
     id: updated.id,
-    weekNumber: updated.index + 1,
+    weekNumber: updated.index + 1, // Convert 0-based to 1-based for display
     title: updated.title,
     description: updated.description,
     status: updated.status,

@@ -40,7 +40,7 @@ export function MentorInternshipDesignerPage() {
     if (!curriculum || !id) return;
 
     try {
-      const weekNumber = curriculum.weeks.length + 1;
+      const weekNumber = curriculum.weeks.length; // Use 0-based index
       await createWeek({
         programId: curriculum.programId,
         weekNumber,

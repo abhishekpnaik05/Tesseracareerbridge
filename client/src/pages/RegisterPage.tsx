@@ -4,7 +4,7 @@ import { PageMeta } from "../components/seo/PageMeta";
 import { Alert, Button, Checkbox, Field, Input, PasswordInput, ProgressBar } from "../components/ui";
 import { AuthScreen } from "../components/auth/AuthScreen";
 import { apiPost, ApiRequestError } from "../lib/api";
-import { EMAIL_PATTERN, PHONE_PATTERN, passwordIssue, passwordStrength, maskEmail } from "../lib/password";
+import { EMAIL_PATTERN, PHONE_PATTERN, passwordIssue, passwordStrength, maskPhone } from "../lib/password";
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -25,6 +25,7 @@ export function RegisterPage() {
     const next: Record<string, string> = {};
     if (name.trim().length < 2) next.name = "Enter your full name.";
     if (!EMAIL_PATTERN.test(email.trim())) next.email = "Enter a valid email.";
+    if (!phone.trim()) next.phone = "Phone number is required.";
     if (phone.trim() && !PHONE_PATTERN.test(phone.trim())) next.phone = "Enter a valid phone number.";
     const issue = passwordIssue(password);
     if (issue) next.password = issue;
@@ -41,9 +42,10 @@ export function RegisterPage() {
     setLoading(true);
     try {
       const data = await apiPost<{
-        user: { email: string };
+        user: { email: string; phone: string };
         devOtp?: string;
         devVerificationToken?: string;
+        requiresPhoneVerification: boolean;
       }>("/auth/register", {
         name,
         email,
@@ -52,10 +54,10 @@ export function RegisterPage() {
         confirmPassword,
         terms,
       });
-      navigate("/verify-email", {
+      navigate("/verify-phone", {
         state: {
-          email: data.user.email,
-          maskedEmail: maskEmail(data.user.email),
+          phone: data.user.phone,
+          maskedPhone: maskPhone(data.user.phone),
           devOtp: data.devOtp,
           token: data.devVerificationToken,
         },
@@ -84,8 +86,8 @@ export function RegisterPage() {
           <Field label="Email" htmlFor="reg-email" error={fieldErrors.email}>
             <Input id="reg-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} invalid={Boolean(fieldErrors.email)} required />
           </Field>
-          <Field label="Phone" htmlFor="reg-phone" hint="Optional for now" error={fieldErrors.phone}>
-            <Input id="reg-phone" type="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} invalid={Boolean(fieldErrors.phone)} />
+          <Field label="Phone" htmlFor="reg-phone" hint="We'll send a verification code" error={fieldErrors.phone}>
+            <Input id="reg-phone" type="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} invalid={Boolean(fieldErrors.phone)} required />
           </Field>
           <Field label="Password" htmlFor="reg-password" error={fieldErrors.password}>
             <PasswordInput id="reg-password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} invalid={Boolean(fieldErrors.password)} required />

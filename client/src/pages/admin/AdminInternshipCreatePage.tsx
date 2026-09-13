@@ -191,7 +191,7 @@ export function AdminInternshipCreatePage() {
 
   function updateWeeksCount(count: number) {
     const newWeeks = Array.from({ length: count }, (_, i) => ({
-      weekNumber: i + 1,
+      weekNumber: i + 1, // Keep 1-based for UI display
       title: curriculumStructure.weeks[i]?.title || `Week ${i + 1}`,
       description: curriculumStructure.weeks[i]?.description || ""
     }));

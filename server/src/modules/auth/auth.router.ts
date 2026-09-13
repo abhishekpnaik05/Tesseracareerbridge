@@ -76,7 +76,14 @@ authRouter.post("/verify", verifyLimiter, async (req, res, next) => {
     const token = typeof req.body?.token === "string" ? req.body.token : undefined;
     const otp = typeof req.body?.otp === "string" ? req.body.otp : undefined;
     const email = typeof req.body?.email === "string" ? req.body.email : undefined;
-    const data = await auth.verifyEmail(token, otp, email);
+    const phone = typeof req.body?.phone === "string" ? req.body.phone : undefined;
+    
+    let data;
+    if (phone) {
+      data = await auth.verifyPhone(token, otp, phone);
+    } else {
+      data = await auth.verifyEmail(token, otp, email);
+    }
     noStore(res);
     res.json({ data });
   } catch (error) {
@@ -86,8 +93,15 @@ authRouter.post("/verify", verifyLimiter, async (req, res, next) => {
 
 authRouter.post("/resend-verification", resendLimiter, async (req, res, next) => {
   try {
-    const email = typeof req.body?.email === "string" ? req.body.email : "";
-    const data = await auth.resendVerification(email);
+    const email = typeof req.body?.email === "string" ? req.body.email : undefined;
+    const phone = typeof req.body?.phone === "string" ? req.body.phone : undefined;
+    
+    let data;
+    if (phone) {
+      data = await auth.resendVerification(phone);
+    } else {
+      data = await auth.resendVerification(email || "");
+    }
     noStore(res);
     res.json({ data });
   } catch (error) {
@@ -153,8 +167,9 @@ authRouter.get("/dev/last-message", (req, res, next) => {
       return;
     }
     const email = typeof req.query.email === "string" ? req.query.email : "";
+    const phone = typeof req.query.phone === "string" ? req.query.phone : "";
     noStore(res);
-    res.json({ data: { message: auth.peekDevInbox(email) ?? null } });
+    res.json({ data: { message: auth.peekDevInbox(phone || email) ?? null } });
   } catch (error) {
     next(error);
   }

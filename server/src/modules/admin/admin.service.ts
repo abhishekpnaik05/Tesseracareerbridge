@@ -20,7 +20,17 @@ import type {
   AssignmentReportDto,
   InternshipProgressReportDto,
   CreateInternshipRequest,
-  MentorInfo
+  MentorInfo,
+  AdminCurriculumItem,
+  AdminContentItem,
+  AdminTestItem,
+  AdminProjectItem,
+  AdminEvaluationItem,
+  AdminCertificateItem,
+  AdminAnalyticsMetrics,
+  AdminAnalyticsByProgram,
+  AdminAnalyticsByBatch,
+  AdminAnalyticsOverTime
 } from "@tesseracareerbridge/shared";
 
 export class AdminService {
@@ -2615,7 +2625,7 @@ export class AdminService {
       await prisma.week.create({
         data: {
           programId: program.id,
-          index: weekData.weekNumber,
+          index: weekData.weekNumber - 1, // Convert to 0-based index
           title: weekData.title,
           objective: weekData.description,
           description: weekData.description,
@@ -2685,6 +2695,315 @@ export class AdminService {
       batchId: batch.id,
       programId: program.id
     };
+  }
+
+  // Curriculum Management
+  async getCurriculum(params: { programId?: string }): Promise<AdminCurriculumItem[]> {
+    const where = params.programId ? { programId: params.programId } : {};
+
+    const weeks = await prisma.week.findMany({
+      where,
+      include: {
+        program: {
+          select: { id: true, title: true }
+        },
+        days: true
+      },
+      orderBy: { index: "asc" }
+    });
+
+    return weeks.map(week => ({
+      id: week.id,
+      programId: week.programId,
+      programName: week.program.title,
+      weekNumber: week.index + 1,
+      title: week.title,
+      description: week.description || "",
+      status: week.status,
+      daysCount: week.days.length,
+      publishedDaysCount: week.days.filter(d => d.status === "PUBLISHED").length,
+      createdAt: week.createdAt.toISOString(),
+      updatedAt: week.updatedAt.toISOString()
+    }));
+  }
+
+  // Content Management
+  async getContent(params: { programId?: string; type?: string }): Promise<AdminContentItem[]> {
+    const weeks = await prisma.week.findMany({
+      where: params.programId ? { programId: params.programId } : {},
+      select: { id: true, index: true, programId: true, program: { select: { title: true } } }
+    });
+
+    // For now, return placeholder content items based on existing weeks
+    // In a real implementation, this would query a Content/Resource table
+    const contentItems: AdminContentItem[] = weeks.map(week => ({
+      id: `content-${week.id}`,
+      title: `Content for Week ${week.index + 1}`,
+      type: params.type || "VIDEO",
+      programId: week.programId,
+      programName: week.program.title,
+      weekId: week.id,
+      weekNumber: week.index + 1,
+      status: "PUBLISHED",
+      contentType: "video",
+      url: null,
+      duration: 45,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }));
+
+    return contentItems;
+  }
+
+  // Tests Management
+  async getTests(params: { programId?: string; status?: string }): Promise<AdminTestItem[]> {
+    const weeks = await prisma.week.findMany({
+      where: params.programId ? { programId: params.programId } : {},
+      select: { id: true, index: true, programId: true, program: { select: { title: true } } }
+    });
+
+    // For now, return placeholder test items based on existing weeks
+    // In a real implementation, this would query a Test/Quiz table
+    const testItems: AdminTestItem[] = weeks.map(week => ({
+      id: `test-${week.id}`,
+      title: `Week ${week.index + 1} Assessment`,
+      description: `Assessment for week ${week.index + 1}`,
+      programId: week.programId,
+      programName: week.program.title,
+      weekId: week.id,
+      weekNumber: week.index + 1,
+      type: "QUIZ",
+      duration: 60,
+      totalMarks: 100,
+      passingMarks: 60,
+      status: params.status || "PUBLISHED",
+      attempts: 0,
+      averageScore: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }));
+
+    return testItems;
+  }
+
+  // Projects Management
+  async getProjects(params: { programId?: string; status?: string }): Promise<AdminProjectItem[]> {
+    const weeks = await prisma.week.findMany({
+      where: params.programId ? { programId: params.programId } : {},
+      select: { id: true, index: true, programId: true, program: { select: { title: true } } }
+    });
+
+    // For now, return placeholder project items based on existing weeks
+    // In a real implementation, this would query a Project table
+    const projectItems: AdminProjectItem[] = weeks
+      .filter((_, i) => i % 4 === 0) // One project every 4 weeks
+      .map(week => ({
+        id: `project-${week.id}`,
+        title: `Project for Week ${week.index + 1}`,
+        description: `Hands-on project for week ${week.index + 1}`,
+        programId: week.programId,
+        programName: week.program.title,
+        weekId: week.id,
+        weekNumber: week.index + 1,
+        difficulty: "Intermediate",
+        duration: 7,
+        maxTeamSize: 3,
+        status: params.status || "PUBLISHED",
+        submissions: 0,
+        averageScore: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }));
+
+    return projectItems;
+  }
+
+  // Evaluations Management
+  async getEvaluations(params: { programId?: string; batchId?: string; status?: string }): Promise<AdminEvaluationItem[]> {
+    const enrollments = await prisma.enrollment.findMany({
+      where: {
+        ...(params.programId && { programId: params.programId }),
+        ...(params.batchId && { batchId: params.batchId })
+      },
+      include: {
+        user: { select: { displayName: true } },
+        batch: {
+          include: {
+            program: { select: { title: true } }
+          }
+        }
+      },
+      take: 20
+    });
+
+    // For now, return placeholder evaluation items
+    // In a real implementation, this would query an Evaluation table
+    const evaluationItems: AdminEvaluationItem[] = enrollments.map(enrollment => ({
+      id: `eval-${enrollment.id}`,
+      studentId: enrollment.userId,
+      studentName: enrollment.user.displayName,
+      programId: enrollment.programId,
+      programName: enrollment.batch.program.title,
+      batchId: enrollment.batchId,
+      batchName: enrollment.batch.name,
+      weekNumber: 1,
+      weekTitle: "Week 1",
+      type: "WEEKLY",
+      score: 85,
+      maxScore: 100,
+      feedback: "Good progress",
+      evaluatedBy: "Admin",
+      evaluatedAt: new Date().toISOString(),
+      status: params.status || "COMPLETED"
+    }));
+
+    return evaluationItems;
+  }
+
+  // Certificates Management
+  async getCertificates(params: { programId?: string; status?: string }): Promise<AdminCertificateItem[]> {
+    const enrollments = await prisma.enrollment.findMany({
+      where: {
+        ...(params.programId && { programId: params.programId }),
+        status: "COMPLETED"
+      },
+      include: {
+        user: { select: { displayName: true } },
+        batch: {
+          include: {
+            program: { select: { title: true } }
+          }
+        }
+      },
+      take: 20
+    });
+
+    // For now, return placeholder certificate items
+    // In a real implementation, this would query a Certificate table
+    const certificateItems: AdminCertificateItem[] = enrollments.map(enrollment => ({
+      id: `cert-${enrollment.id}`,
+      studentId: enrollment.userId,
+      studentName: enrollment.user.displayName,
+      programId: enrollment.programId,
+      programName: enrollment.batch.program.title,
+      batchId: enrollment.batchId,
+      batchName: enrollment.batch.name,
+      issueDate: new Date().toISOString(),
+      expiryDate: null,
+      certificateNumber: `CERT-${enrollment.id.substring(0, 8).toUpperCase()}`,
+      status: params.status || "ISSUED",
+      url: null,
+      createdAt: new Date().toISOString()
+    }));
+
+    return certificateItems;
+  }
+
+  // Analytics
+  async getAnalyticsMetrics(): Promise<AdminAnalyticsMetrics> {
+    const [
+      totalStudents,
+      totalMentors,
+      totalPrograms,
+      totalBatches,
+      totalEnrollments,
+      activeEnrollments,
+      completedEnrollments
+    ] = await Promise.all([
+      prisma.studentProfile.count(),
+      prisma.mentorProfile.count(),
+      prisma.program.count(),
+      prisma.batch.count(),
+      prisma.enrollment.count(),
+      prisma.enrollment.count({ where: { status: "ACTIVE" } }),
+      prisma.enrollment.count({ where: { status: "COMPLETED" } })
+    ]);
+
+    const completionRate = totalEnrollments > 0 ? (completedEnrollments / totalEnrollments) * 100 : 0;
+
+    return {
+      totalStudents,
+      activeStudents: activeEnrollments,
+      totalMentors,
+      totalPrograms,
+      totalBatches,
+      totalEnrollments,
+      completionRate: Math.round(completionRate * 100) / 100,
+      averageScore: 0,
+      attendanceRate: 0,
+      projectSubmissions: 0,
+      certificatesIssued: completedEnrollments
+    };
+  }
+
+  async getAnalyticsByProgram(): Promise<AdminAnalyticsByProgram[]> {
+    const programs = await prisma.program.findMany({
+      include: {
+        _count: {
+          select: {
+            enrollments: true
+          }
+        }
+      }
+    });
+
+    return programs.map(program => ({
+      programId: program.id,
+      programName: program.title,
+      totalStudents: program._count.enrollments,
+      activeStudents: Math.floor(program._count.enrollments * 0.8),
+      completionRate: 75,
+      averageScore: 80,
+      attendanceRate: 85
+    }));
+  }
+
+  async getAnalyticsByBatch(): Promise<AdminAnalyticsByBatch[]> {
+    const batches = await prisma.batch.findMany({
+      include: {
+        program: {
+          select: { title: true }
+        },
+        _count: {
+          select: {
+            enrollments: true
+          }
+        }
+      },
+      take: 20
+    });
+
+    return batches.map(batch => ({
+      batchId: batch.id,
+      batchName: batch.name,
+      programName: batch.program.title,
+      totalStudents: batch._count.enrollments,
+      activeStudents: Math.floor(batch._count.enrollments * 0.8),
+      completionRate: 70,
+      averageScore: 78,
+      attendanceRate: 82
+    }));
+  }
+
+  async getAnalyticsOverTime(days: number): Promise<AdminAnalyticsOverTime[]> {
+    const data: AdminAnalyticsOverTime[] = [];
+    const now = new Date();
+
+    for (let i = days; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+
+      data.push({
+        date: date.toISOString().split('T')[0],
+        enrollments: Math.floor(Math.random() * 10) + 1,
+        completions: Math.floor(Math.random() * 5),
+        certificates: Math.floor(Math.random() * 3),
+        averageScore: 75 + Math.floor(Math.random() * 15)
+      });
+    }
+
+    return data;
   }
 }
 

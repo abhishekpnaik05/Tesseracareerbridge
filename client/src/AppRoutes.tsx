@@ -8,6 +8,7 @@ import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { VerifyEmailPage } from "./pages/VerifyEmailPage";
+import { VerifyPhonePage } from "./pages/VerifyPhonePage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { ForbiddenPage } from "./pages/ForbiddenPage";
@@ -66,6 +67,13 @@ import { AdminInternshipCreatePage } from "./pages/admin/AdminInternshipCreatePa
 import { AdminDdpPage } from "./pages/admin/AdminDdpPage";
 import { AdminAssignmentsPage } from "./pages/admin/AdminAssignmentsPage";
 import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage";
+import { AdminCurriculumPage } from "./pages/admin/AdminCurriculumPage";
+import { AdminContentPage } from "./pages/admin/AdminContentPage";
+import { AdminTestsPage } from "./pages/admin/AdminTestsPage";
+import { AdminProjectsPage } from "./pages/admin/AdminProjectsPage";
+import { AdminEvaluationsPage } from "./pages/admin/AdminEvaluationsPage";
+import { AdminCertificatesPage } from "./pages/admin/AdminCertificatesPage";
+import { AdminAnalyticsPage } from "./pages/admin/AdminAnalyticsPage";
 
 export function AppRoutes() {
   return (
@@ -85,6 +93,7 @@ export function AppRoutes() {
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/get-started" element={<GetStartedPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/verify-phone" element={<VerifyPhonePage />} />
         <Route path="/forbidden" element={<ForbiddenPage />} />
         <Route element={<GuestOnly />}>
           <Route path="/login" element={<LoginPage />} />
@@ -164,14 +173,14 @@ export function AppRoutes() {
         <Route path="ddp" element={<AdminDdpPage />} />
         <Route path="assignments" element={<AdminAssignmentsPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
-        <Route path="curriculum" element={<FoundationPageWrap area="Admin" title="Curriculum" summary="Weeks and days. Never hard-coded in the client." />} />
-        <Route path="content" element={<FoundationPageWrap area="Admin" title="Content" summary="Videos, notes, and resources via object storage." />} />
-        <Route path="tests" element={<FoundationPageWrap area="Admin" title="Tests" summary="Test authoring." />} />
-        <Route path="projects" element={<FoundationPageWrap area="Admin" title="Projects" summary="Project authoring." />} />
-        <Route path="evaluations" element={<FoundationPageWrap area="Admin" title="Evaluations" summary="Evaluation oversight." />} />
-        <Route path="certificates" element={<FoundationPageWrap area="Admin" title="Certificates" summary="Issuance and verification." />} />
+        <Route path="curriculum" element={<AdminCurriculumPage />} />
+        <Route path="content" element={<AdminContentPage />} />
+        <Route path="tests" element={<AdminTestsPage />} />
+        <Route path="projects" element={<AdminProjectsPage />} />
+        <Route path="evaluations" element={<AdminEvaluationsPage />} />
+        <Route path="certificates" element={<AdminCertificatesPage />} />
         <Route path="notifications" element={<FoundationPageWrap area="Admin" title="Notifications" summary="Announcements and notifications." />} />
-        <Route path="analytics" element={<FoundationPageWrap area="Admin" title="Analytics" summary="Platform analytics." />} />
+        <Route path="analytics" element={<AdminAnalyticsPage />} />
         </Route>
       </Route>
 

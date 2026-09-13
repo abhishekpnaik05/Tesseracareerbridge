@@ -36,6 +36,7 @@ export interface AuthUser {
   status: AccountStatus;
   emailVerified: boolean;
   phone: string | null;
+  phoneVerified: boolean;
 }
 
 export interface JwtPayload {
@@ -1130,6 +1131,152 @@ export interface WeekStructure {
 export interface InternshipCurriculumStructure {
   totalWeeks: number;
   weeks: WeekStructure[];
+}
+
+// New Admin Page Types
+export interface AdminCurriculumItem {
+  id: string;
+  programId: string;
+  programName: string;
+  weekNumber: number;
+  title: string;
+  description: string;
+  status: string;
+  daysCount: number;
+  publishedDaysCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminContentItem {
+  id: string;
+  title: string;
+  type: string;
+  programId: string;
+  programName: string;
+  weekId: string | null;
+  weekNumber: number | null;
+  status: string;
+  contentType: string;
+  url: string | null;
+  duration: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminTestItem {
+  id: string;
+  title: string;
+  description: string;
+  programId: string;
+  programName: string;
+  weekId: string | null;
+  weekNumber: number | null;
+  type: string;
+  duration: number;
+  totalMarks: number;
+  passingMarks: number;
+  status: string;
+  attempts: number;
+  averageScore: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminProjectItem {
+  id: string;
+  title: string;
+  description: string;
+  programId: string;
+  programName: string;
+  weekId: string | null;
+  weekNumber: number | null;
+  difficulty: string;
+  duration: number;
+  maxTeamSize: number;
+  status: string;
+  submissions: number;
+  averageScore: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminEvaluationItem {
+  id: string;
+  studentId: string;
+  studentName: string;
+  programId: string;
+  programName: string;
+  batchId: string;
+  batchName: string;
+  weekNumber: number;
+  weekTitle: string;
+  type: string;
+  score: number;
+  maxScore: number;
+  feedback: string | null;
+  evaluatedBy: string;
+  evaluatedAt: string;
+  status: string;
+}
+
+export interface AdminCertificateItem {
+  id: string;
+  studentId: string;
+  studentName: string;
+  programId: string;
+  programName: string;
+  batchId: string;
+  batchName: string;
+  issueDate: string;
+  expiryDate: string | null;
+  certificateNumber: string;
+  status: string;
+  url: string | null;
+  createdAt: string;
+}
+
+export interface AdminAnalyticsMetrics {
+  totalStudents: number;
+  activeStudents: number;
+  totalMentors: number;
+  totalPrograms: number;
+  totalBatches: number;
+  totalEnrollments: number;
+  completionRate: number;
+  averageScore: number;
+  attendanceRate: number;
+  projectSubmissions: number;
+  certificatesIssued: number;
+}
+
+export interface AdminAnalyticsByProgram {
+  programId: string;
+  programName: string;
+  totalStudents: number;
+  activeStudents: number;
+  completionRate: number;
+  averageScore: number;
+  attendanceRate: number;
+}
+
+export interface AdminAnalyticsByBatch {
+  batchId: string;
+  batchName: string;
+  programName: string;
+  totalStudents: number;
+  activeStudents: number;
+  completionRate: number;
+  averageScore: number;
+  attendanceRate: number;
+}
+
+export interface AdminAnalyticsOverTime {
+  date: string;
+  enrollments: number;
+  completions: number;
+  certificates: number;
+  averageScore: number;
 }
 
 export interface MentorInfo {
